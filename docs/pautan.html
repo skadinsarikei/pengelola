@@ -1,0 +1,2644 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laman Info Pengelola Pertandingan</title>
+<link rel="icon" type="image/png" href="https://i.postimg.cc/qBcGF2Ww/Logo-SK-Adin.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sidebar-w: 256px;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-100: #dbeafe;
+  --blue-50:  #eff6ff;
+  --emerald-400: #34d399;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --rose-500: #e11d48;
+  --rose-50: #fff1f2;
+  --rose-100: #ffe4e6;
+  --slate-900: #0f172a;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748b;
+  --slate-400: #94a3b8;
+  --slate-300: #cbd5e1;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  --slate-50:  #f8fafc;
+  --white:     #ffffff;
+  --radius:    8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
+  --shadow:    0 4px 12px rgba(0,0,0,.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.10);
+  --transition: 150ms cubic-bezier(.4,0,.2,1);
+}
+
+html, body { height: 100%; }
+html { font-size: 14px; overscroll-behavior: none; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--slate-50);
+  color: var(--slate-900);
+  overflow: hidden;
+  overscroll-behavior: none; /* elak gesture pinch/scroll bocor ke browser & cetus "pull-to-refresh" */
+}
+.hidden { display: none !important; }
+a { text-decoration: none; }
+
+/* ─────────────────── SCROLLBAR ─────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--slate-300); border-radius: 99px; }
+
+/* ─────────────────── APP SHELL (kongsi Public & Admin) ─────────────────── */
+.app-shell { height: 100vh; display: flex; overflow: hidden; }
+
+.sidebar {
+  width: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--slate-900);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  z-index: 50;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 250ms cubic-bezier(.4,0,.2,1);
+}
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+}
+
+.sb-header {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sb-logo {
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  object-fit: contain;
+  background: rgba(255,255,255,.08);
+  flex-shrink: 0;
+}
+.sb-header-text { overflow: hidden; }
+.sb-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 13px;
+  color: #fff;
+  line-height: 1.25;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sb-school {
+  font-size: 11px;
+  color: var(--slate-400);
+  margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.sb-nav { padding: 12px 8px; flex: 1; }
+.sb-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--slate-600);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 10px 8px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--slate-400);
+  transition: background var(--transition), color var(--transition);
+  margin-bottom: 1px;
+  user-select: none;
+  text-decoration: none;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: 'DM Sans', sans-serif;
+}
+.nav-item svg { flex-shrink: 0; opacity: .7; }
+.nav-item:hover { background: rgba(255,255,255,.06); color: #fff; }
+.nav-item:hover svg { opacity: 1; }
+.nav-item.active { background: var(--blue-600); color: #fff; }
+.nav-item.active svg { opacity: 1; }
+.nav-item .nav-item-label { flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.nav-item .nav-item-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.nav-item .nav-item-ext { opacity: .45; flex-shrink: 0; }
+
+.sb-footer {
+  padding: 12px 8px;
+  border-top: 1px solid rgba(255,255,255,.06);
+}
+.sb-footer .nav-item.danger { color: #fca5a5; }
+.sb-footer .nav-item.danger:hover { background: rgba(248,113,113,.12); color: #fca5a5; }
+.sb-footer .nav-item.accent { color: var(--emerald-400); }
+.sb-footer .nav-item.accent:hover { background: rgba(52,211,153,.1); color: var(--emerald-400); }
+.sb-meta {
+  font-size: 11px;
+  color: var(--slate-600);
+  padding: 8px 8px 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.main-area {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--slate-200);
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--slate-600);
+  transition: background var(--transition);
+}
+.hamburger-btn:hover { background: var(--slate-100); }
+.topbar-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  color: var(--slate-900);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topbar-badge {
+  font-size: 11px;
+  background: var(--blue-50);
+  color: var(--blue-600);
+  border: 1px solid var(--blue-100);
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-weight: 600;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.content-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px;
+}
+.tab-view { display: none; }
+.tab-view.active { display: block; }
+
+@media (max-width: 1023px) {
+  .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); box-shadow: none; }
+  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
+  .sidebar-overlay.show { display: block; }
+  .main-area { margin-left: 0; height: 100vh; }
+  .hamburger-btn { display: flex; align-items: center; justify-content: center; }
+}
+
+/* ─────────────────── BUTTONS ─────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn svg { flex-shrink: 0; }
+.btn-primary { background: var(--blue-600); color: #fff; }
+.btn-primary:hover { background: var(--blue-700); }
+.btn-secondary { background: var(--slate-100); color: var(--slate-700); border: 1px solid var(--slate-200); }
+.btn-secondary:hover { background: var(--slate-200); }
+.btn-emerald { background: var(--emerald-600); color: #fff; }
+.btn-emerald:hover { background: var(--emerald-700); }
+.btn-amber { background: var(--amber-500); color: #fff; }
+.btn-amber:hover { background: var(--amber-600); }
+.btn-outline { background: var(--white); color: var(--slate-600); border: 1.5px solid var(--slate-200); }
+.btn-outline:hover { border-color: var(--slate-400); color: var(--slate-900); }
+.btn-danger-outline { background: var(--white); color: #dc2626; border: 1.5px solid #fecaca; }
+.btn-danger-outline:hover { background: #fef2f2; border-color: #dc2626; }
+.btn-icon { padding: 8px; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ─────────────────── CARD / FORM ─────────────────── */
+.card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--slate-200);
+}
+.card-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--slate-100);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  color: var(--slate-900);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title svg { color: var(--blue-600); flex-shrink: 0; }
+.card-body { padding: 20px; }
+
+.sec-heading {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--slate-900);
+  margin-bottom: 4px;
+}
+.sec-sub { font-size: 13px; color: var(--slate-500); margin-bottom: 20px; }
+
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate-600);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.form-input, .form-select, .form-textarea {
+  padding: 9px 12px;
+  border: 1.5px solid var(--slate-200);
+  border-radius: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--slate-900);
+  outline: none;
+  transition: border var(--transition), box-shadow var(--transition);
+  background: var(--white);
+  width: 100%;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+}
+.form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.form-row.cols-1 { grid-template-columns: 1fr; }
+@media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+
+.color-field { display: flex; gap: 8px; align-items: center; }
+.color-field input[type="color"] { width: 42px; height: 38px; border: 1.5px solid var(--slate-200); border-radius: 7px; cursor: pointer; padding: 2px; flex-shrink: 0; }
+.color-preview-chip {
+  min-width: 70px; height: 38px; border-radius: 7px; border: 1px solid var(--slate-200);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+
+.toggle-switch {
+  position: relative;
+  width: 38px;
+  height: 21px;
+  background: var(--slate-300);
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background var(--transition);
+  flex-shrink: 0;
+}
+.toggle-switch.active { background: var(--emerald-600); }
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 17px; height: 17px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--transition);
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+.toggle-switch.active::after { transform: translateX(17px); }
+
+.empty-state {
+  text-align: center;
+  padding: 56px 20px;
+  color: var(--slate-400);
+}
+.empty-state svg { color: var(--slate-300); margin-bottom: 14px; }
+.empty-state h3 { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--slate-700); margin-bottom: 6px; }
+.empty-state p { font-size: 13px; color: var(--slate-500); margin-bottom: 16px; }
+
+.hint-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--amber-600);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.hint-banner svg { flex-shrink: 0; margin-top: 1px; }
+.hint-banner strong { color: var(--slate-800); }
+.hint-banner ul { margin: 4px 0 0 16px; padding: 0; color: var(--slate-700); }
+
+.info-banner {
+  background: var(--blue-50);
+  border: 1px solid var(--blue-100);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--blue-700);
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.info-banner svg { flex-shrink: 0; margin-top: 1px; }
+.info-banner strong { color: var(--slate-800); }
+.info-banner ul { margin: 4px 0 0 16px; padding: 0; color: var(--slate-700); }
+
+/* ─────────────────── PUBLIC: LINK GRID ─────────────────── */
+.link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+@media (min-width: 1024px) {
+  .link-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .link-card { padding: 18px 20px; font-size: 15px; }
+  .link-card .link-card-icon { width: 38px; height: 38px; }
+}
+
+/* ─────────────────── BANNER ─────────────────── */
+.content-banner {
+  width: 100%;
+  margin-bottom: 18px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: var(--slate-100);
+  position: relative;
+  /* Tiada aspect-ratio tetap — imej papar ketinggian semula jadi, tiada crop */
+}
+.content-banner-img {
+  width: 100%;
+  height: auto;         /* ketinggian ikut nisbah sebenar imej */
+  display: block;
+  transition: opacity .3s ease;
+}
+/* Had ketinggian maksimum supaya banner tak terlalu besar di skrin besar */
+@media (min-width: 1024px) {
+  .content-banner { margin-bottom: 20px; }
+  .content-banner-img { max-height: 400px; object-fit: contain; object-position: center; }
+}
+/* Placeholder bila tiada gambar / gambar gagal muat */
+.content-banner-placeholder {
+  width: 100%;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--slate-400);
+  background: var(--slate-100);
+  border: 2px dashed var(--slate-300);
+  border-radius: var(--radius-lg);
+}
+.content-banner-placeholder svg { opacity: .4; }
+.content-banner-placeholder p { font-size: 12px; }
+
+.link-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-left: 4px solid var(--blue-600);
+  border-radius: var(--radius-lg);
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--slate-900);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition), box-shadow var(--transition);
+  cursor: pointer;
+}
+.link-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.link-card .link-card-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.link-card .link-card-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.link-card .link-card-ext { opacity: .55; flex-shrink: 0; color: var(--slate-400); }
+
+.category-strip { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.category-pill-btn {
+  padding: 8px 16px;
+  border-radius: 99px;
+  border: 1.5px solid var(--slate-200);
+  background: var(--white);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12.5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--slate-600);
+  transition: all var(--transition);
+}
+.category-pill-btn:hover { border-color: var(--blue-600); }
+.category-pill-btn.active { color: #fff; border-color: transparent; }
+
+/* ─────────────────── PDF VIEWER MODAL ─────────────────── */
+.pdf-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.75);
+  z-index: 160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  overscroll-behavior: contain; /* sekat pinch overflow drpd bocor ke halaman induk */
+  touch-action: none; /* overlay sendiri x perlu gesture, hanya iframe di dalam yg perlu */
+}
+.pdf-modal-box {
+  width: 100%;
+  max-width: 960px;
+  height: 90vh;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 80px rgba(0,0,0,.4);
+  position: relative;
+  overscroll-behavior: contain;
+}
+.pdf-modal-header {
+  padding: 11px 14px;
+  background: var(--slate-900);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.pdf-modal-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.pdf-modal-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.pdf-modal-close-btn {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255,255,255,.1);
+  color: var(--white);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition);
+  flex-shrink: 0;
+}
+.pdf-modal-close-btn:hover { background: rgba(239,68,68,.7); }
+.pdf-modal-loading {
+  position: absolute;
+  inset: 48px 0 0 0; /* bawah header */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--white);
+  z-index: 1;
+  font-size: 13px;
+  color: var(--slate-500);
+  font-weight: 600;
+}
+.pdf-modal-loading.hidden { display: none; }
+.pdf-modal-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background: var(--slate-100);
+  overscroll-behavior: contain;
+}
+.pdf-modal-body iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+  /* Wajib: benarkan sentuhan/pinch-to-zoom dalam iframe */
+  touch-action: auto;
+  overscroll-behavior: contain;
+}
+/* Mobile: fullscreen sepenuhnya */
+@media (max-width: 767px) {
+  .pdf-modal-overlay { padding: 0; }
+  .pdf-modal-box {
+    border-radius: 0;
+    /* guna svh (small viewport height, stabil semasa pinch/scroll) drpd dvh,
+       kerana dvh recalculate setiap kali address-bar toggle -> punca "auto reload" semasa pinch-zoom */
+    height: 100vh;
+    height: 100svh;
+    max-width: 100%;
+  }
+}
+/* Badge PDF pada kad pautan */
+.pdf-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 2px 5px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+/* Badge PDF pada nav-item sidebar */
+.nav-item .pdf-badge { background: rgba(239,68,68,.15); border-color: rgba(239,68,68,.3); color: #fca5a5; }
+
+/* ─────────────────── IMAGE VIEWER MODAL (pinch-to-zoom) ─────────────────── */
+.img-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.85);
+  z-index: 160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+.img-modal-box {
+  width: 100%;
+  max-width: 960px;
+  height: 90vh;
+  background: var(--slate-900);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 80px rgba(0,0,0,.4);
+  position: relative;
+  overscroll-behavior: contain;
+}
+.img-modal-header {
+  padding: 11px 14px;
+  background: var(--slate-900);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.img-modal-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.img-modal-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.img-modal-close-btn {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255,255,255,.1);
+  color: var(--white);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition);
+  flex-shrink: 0;
+}
+.img-modal-close-btn:hover { background: rgba(239,68,68,.7); }
+.img-modal-loading {
+  position: absolute;
+  inset: 48px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--slate-900);
+  z-index: 1;
+  font-size: 13px;
+  color: var(--slate-400);
+  font-weight: 600;
+}
+.img-modal-loading.hidden { display: none; }
+.img-modal-body {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background: var(--slate-900);
+  overscroll-behavior: contain;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: pinch-zoom pan-x pan-y;
+}
+.img-modal-body img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  display: block;
+  touch-action: pinch-zoom pan-x pan-y;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+/* Mobile: fullscreen sepenuhnya */
+@media (max-width: 767px) {
+  .img-modal-overlay { padding: 0; }
+  .img-modal-box {
+    border-radius: 0;
+    height: 100vh;
+    height: 100svh;
+    max-width: 100%;
+  }
+}
+/* ─────────────────── NOTA MODAL (Papar - Awam) ─────────────────── */
+.note-modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.85);
+  z-index: 160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.note-modal-box {
+  width: 100%;
+  max-width: 720px;
+  max-height: 88vh;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 80px rgba(0,0,0,.4);
+}
+.note-modal-header {
+  padding: 14px 16px;
+  background: var(--slate-900);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.note-modal-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.note-modal-close-btn {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255,255,255,.1);
+  color: var(--white);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition);
+  flex-shrink: 0;
+}
+.note-modal-close-btn:hover { background: rgba(239,68,68,.7); }
+.note-modal-body {
+  flex: 1;
+  min-height: 120px;
+  overflow-y: auto;
+  padding: 22px 24px;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--slate-800);
+}
+.note-modal-body p { margin: 0 0 .8em; }
+.note-modal-body ul, .note-modal-body ol { margin: 0 0 .8em 1.4em; }
+.note-modal-body a { color: var(--blue-600); text-decoration: underline; }
+.note-modal-body img { max-width: 100%; border-radius: 6px; }
+.note-modal-body:empty::before { content: 'Tiada kandungan nota.'; color: var(--slate-400); }
+@media (max-width: 767px) {
+  .note-modal-overlay { padding: 0; }
+  .note-modal-box { border-radius: 0; height: 100vh; height: 100svh; max-width: 100%; max-height: none; }
+}
+
+/* ─────────────────── NOTA EDITOR MODAL (WYSIWYG - Admin) ─────────────────── */
+.note-editor-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 170;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(3px);
+}
+.note-editor-box {
+  width: 100%;
+  max-width: 720px;
+  max-height: 88vh;
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 80px rgba(0,0,0,.35);
+}
+.note-editor-header {
+  padding: 14px 16px;
+  background: var(--slate-900);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.note-editor-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+}
+.note-editor-close-btn {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255,255,255,.1);
+  color: var(--white);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition);
+  flex-shrink: 0;
+}
+.note-editor-close-btn:hover { background: rgba(239,68,68,.7); }
+.note-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 10px;
+  background: var(--slate-100);
+  border-bottom: 1px solid var(--slate-200);
+  flex-shrink: 0;
+}
+.note-editor-toolbar button {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--slate-200);
+  background: var(--white);
+  color: var(--slate-700);
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition);
+}
+.note-editor-toolbar button:hover { background: var(--blue-50); border-color: var(--blue-100); color: var(--blue-700); }
+.note-editor-toolbar button.italic-btn { font-style: italic; }
+.note-editor-toolbar button.underline-btn { text-decoration: underline; }
+.note-editor-toolbar .toolbar-sep { width: 1px; background: var(--slate-200); margin: 3px 4px; }
+.note-editor-body {
+  flex: 1;
+  min-height: 220px;
+  overflow-y: auto;
+  padding: 16px 18px;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--slate-900);
+  outline: none;
+}
+.note-editor-body p { margin: 0 0 .8em; }
+.note-editor-body ul, .note-editor-body ol { margin: 0 0 .8em 1.4em; }
+.note-editor-body:empty::before { content: attr(data-placeholder); color: var(--slate-400); pointer-events: none; }
+.note-editor-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--slate-200);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+@media (max-width: 767px) {
+  .note-editor-overlay { padding: 0; }
+  .note-editor-box { border-radius: 0; height: 100vh; height: 100svh; max-width: 100%; max-height: none; }
+}
+
+/* Kad pautan bermod Nota (tiada URL) */
+.note-hint {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  background: var(--blue-50);
+  border: 1px dashed var(--blue-100);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.note-hint p {
+  flex: 1;
+  min-width: 160px;
+  font-size: 12.5px;
+  color: var(--slate-600);
+  line-height: 1.5;
+}
+.note-hint.hidden { display: none; }
+
+/* Badge Imej pada kad pautan */
+.img-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  background: #eff6ff;
+  color: var(--blue-600);
+  border: 1px solid var(--blue-100);
+  padding: 2px 5px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+/* Badge Imej pada nav-item sidebar */
+.nav-item .img-badge { background: rgba(37,99,235,.15); border-color: rgba(37,99,235,.3); color: #93c5fd; }
+
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15,23,42,.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+.modal-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 28px;
+  width: 100%;
+  max-width: 360px;
+}
+.modal-icon-circle {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--blue-50); color: var(--blue-600);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px;
+}
+.modal-title { font-family: 'DM Serif Display', serif; font-size: 19px; text-align: center; color: var(--slate-900); }
+.modal-sub { font-size: 12.5px; text-align: center; color: var(--slate-500); margin: 4px 0 18px; }
+.modal-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; font-size: 12px; padding: 9px 12px; border-radius: 7px; margin-bottom: 12px; }
+
+/* ─────────────────── LOADING / TOAST ─────────────────── */
+#initialLoading { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 200; flex-direction: column; gap: 14px; }
+.loading-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.6); display: flex; align-items: center; justify-content: center; z-index: 200; }
+.loading-box { background: var(--white); padding: 18px 24px; border-radius: var(--radius-lg); display: flex; gap: 14px; align-items: center; box-shadow: var(--shadow-lg); font-weight: 600; font-size: 13px; color: var(--slate-700); }
+.spinner { width: 26px; height: 26px; border: 3px solid var(--slate-200); border-top-color: var(--blue-600); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+#toastContainer { position: fixed; top: 16px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 10px; max-width: 320px; }
+.toast { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: var(--radius); box-shadow: var(--shadow-lg); font-size: 13px; font-weight: 600; color: #fff; }
+.toast.success { background: var(--emerald-600); }
+.toast.error { background: #dc2626; }
+.toast.info { background: var(--blue-600); }
+
+/* ─────────────────── PUBLIC PROFILE HEADER (Topbar admin / public banner) ─────────────────── */
+.public-banner {
+  background: var(--white);
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.public-banner-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: var(--slate-100); flex-shrink: 0; }
+.public-banner-avatar.square { border-radius: 10px; }
+.public-banner-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--slate-900); }
+.public-banner-desc { font-size: 12.5px; color: var(--slate-500); margin-top: 2px; }
+
+/* ─────────────────── ADMIN: STAT CARDS ─────────────────── */
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+@media (max-width: 768px) { .stat-grid { grid-template-columns: 1fr; } }
+.stat-card { background: var(--white); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow-sm); }
+.stat-card .stat-label { font-size: 12px; color: var(--slate-500); margin-bottom: 4px; }
+.stat-card .stat-value { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--slate-900); }
+.stat-card .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stat-icon.blue { background: var(--blue-50); color: var(--blue-600); }
+.stat-icon.emerald { background: #d1fae5; color: var(--emerald-600); }
+.stat-icon.amber { background: #fef3c7; color: var(--amber-600); }
+
+/* ─────────────────── ADMIN: SIMPLE TABLE ─────────────────── */
+.simple-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.simple-table th, .simple-table td { border: 1px solid var(--slate-200); padding: 9px 12px; text-align: left; }
+.simple-table thead th { background: var(--slate-900); color: #fff; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+.simple-table tbody tr:nth-child(even) { background: var(--slate-50); }
+.simple-table tbody tr:hover { background: var(--blue-50); }
+.status-chip { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px; display: inline-flex; }
+.status-chip.on { background: #d1fae5; color: var(--emerald-700); }
+.status-chip.off { background: var(--slate-100); color: var(--slate-500); }
+
+/* ─────────────────── ADMIN: EDITOR ROW CARD (Links / Categories) ─────────────────── */
+.editor-row { margin-bottom: 14px; }
+.editor-row-head { padding: 12px 18px; border-bottom: 1px solid var(--slate-100); display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.editor-row-head-left { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 13px; color: var(--slate-700); }
+.editor-row-head-left svg { color: var(--slate-400); }
+.editor-row-actions { display: flex; align-items: center; gap: 6px; }
+.icon-action-btn { background: none; border: none; cursor: pointer; padding: 7px; border-radius: 6px; color: var(--slate-500); transition: all var(--transition); display: flex; }
+.icon-action-btn:hover { background: var(--blue-50); color: var(--blue-600); }
+.icon-action-btn.danger:hover { background: #fef2f2; color: #dc2626; }
+.icon-action-btn:disabled { opacity: .3; cursor: not-allowed; }
+.icon-action-btn:disabled:hover { background: none; color: var(--slate-500); }
+.active-toggle-label { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--slate-600); font-weight: 600; }
+
+/* ─────────────────── ADMIN: MOBILE PREVIEW FRAME ─────────────────── */
+.preview-panel { width: 270px; background: var(--slate-100); padding: 16px 14px; flex-shrink: 0; overflow-y: auto; border-left: 1px solid var(--slate-200); }
+@media (max-width: 1280px) { .preview-panel { display: none; } }
+.preview-panel-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--slate-500); text-align: center; margin-bottom: 10px; }
+.mobile-frame { width: 100%; max-width: 230px; aspect-ratio: 9/17; margin: 0 auto; border: 6px solid var(--slate-900); border-radius: 20px; background: #fff; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
+.mobile-frame::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 50px; height: 10px; background: var(--slate-900); border-radius: 0 0 8px 8px; z-index: 10; }
+.mobile-content { width: 100%; height: 100%; overflow-y: auto; padding-top: 14px; font-size: 8px; display: flex; }
+.mobile-frame-iframe { width: 100%; height: 100%; border: none; display: block; background: #fff; }
+.preview-panel .btn { font-size: 11.5px; }
+
+@media (max-width: 640px) {
+  .content-area { padding: 16px; }
+  .stat-grid { grid-template-columns: 1fr; }
+}
+
+/* ─────────────────── ADMIN ROW (main-area + preview-panel) ─────────────────── */
+.admin-row { display: flex; height: 100vh; overflow: hidden; margin-left: var(--sidebar-w); }
+.admin-row .main-area { margin-left: 0; }
+@media (max-width: 1023px) { .admin-row { margin-left: 0; } }
+
+/* ─────────────────── ICON SYSTEM ─────────────────── */
+[class^="icon-"] { display: inline-flex; align-items: center; justify-content: center; line-height: 0; flex-shrink: 0; }
+.nav-item [class^="icon-"] { font-size: 15px; }
+.card-title [class^="icon-"] { font-size: 15px; }
+.btn [class^="icon-"] { font-size: 13px; }
+.topbar-badge [class^="icon-"] { font-size: 11px; }
+.hint-banner > [class^="icon-"], .info-banner > [class^="icon-"] { font-size: 15px; margin-top: 1px; }
+.icon-action-btn [class^="icon-"] { font-size: 14px; }
+.sb-meta [class^="icon-"] { font-size: 11px; }
+.modal-icon-circle [class^="icon-"] { font-size: 22px; }
+.category-pill-btn [class^="icon-"] { font-size: 12px; }
+.link-card [class^="icon-"] { font-size: 15px; }
+.stat-icon [class^="icon-"] { font-size: 18px; }
+.empty-state > [class^="icon-"] { font-size: 44px; margin-bottom: 14px; }
+.editor-row-head-left [class^="icon-"] { font-size: 14px; }
+
+</style>
+</head>
+<body>
+
+<!-- Initial Loading -->
+<div id="initialLoading">
+  <div class="spinner"></div>
+  <p style="font-size:13px;font-weight:600;color:var(--slate-600);">Memuatkan...</p>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="loading-box">
+    <div class="spinner" style="width:22px;height:22px;"></div>
+    <p id="loadingMessage">Memuatkan...</p>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<!-- ══════════════════════════════════ PUBLIC VIEW ══════════════════════════════════ -->
+<div id="publicView" class="hidden">
+  <div class="app-shell">
+    <div class="sidebar-overlay" id="pubOverlay" onclick="closePubSidebar()"></div>
+
+    <aside class="sidebar" id="pubSidebar">
+      <div class="sb-header">
+        <img class="sb-logo" id="pubLogo" src="https://i.postimg.cc/qBcGF2Ww/Logo-SK-Adin.png" alt="Logo">
+        <div class="sb-header-text">
+          <div class="sb-title" id="pubTitle">SK ADIN</div>
+          <div class="sb-school" id="pubDesc">Pautan Link</div>
+        </div>
+      </div>
+
+      <nav class="sb-nav">
+        <div class="sb-section-label">Menu</div>
+        <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/index.html" target="_top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17" style="flex-shrink:0;"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg>
+          <span class="nav-item-label">Halaman Utama</span>
+        </a>
+        <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/borangtarian.html" target="_top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17" style="flex-shrink:0;"><circle cx="12" cy="4.5" r="1.6"/><path d="M12 6.5v5.5"/><path d="M12 12 7 9"/><path d="M12 12l6-2"/><path d="M12 12l-4 8"/><path d="M12 12l5 7"/></svg>
+          <span class="nav-item-label">Borang Tarian</span>
+        </a>
+        <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/borangnyanyian.html" target="_top">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17" style="flex-shrink:0;"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v4"/><path d="M9 22h6"/></svg>
+          <span class="nav-item-label">Borang Nyanyian</span>
+        </a>
+
+        <div id="pubCategoryNavWrap" class="hidden">
+          <div class="sb-section-label">Kategori</div>
+          <div id="pubCategoryNav"></div>
+        </div>
+        <div id="pubNoCatNavWrap" class="hidden">
+          <div class="sb-section-label">Pautan Lain</div>
+          <div id="pubNoCatNav"></div>
+        </div>
+        <div id="pubNavEmptyState" class="hidden" style="padding:14px 8px;font-size:12px;color:var(--slate-500);">Tiada pautan tersedia.</div>
+      </nav>
+
+      <div class="sb-footer">
+        <button class="nav-item accent" id="pubLoginBtn">
+          <span class="icon-lock"></span>
+          <span class="nav-item-label">Log Masuk Admin</span>
+        </button>
+        <div class="sb-meta">
+          <span class="icon-info"></span>
+          Pautan Link SK Adin
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-area">
+      <div class="topbar">
+        <button class="hamburger-btn" id="pubHamburgerBtn" onclick="openPubSidebar()">
+          <span class="icon-menu"></span>
+        </button>
+        <span class="topbar-title" id="pubContentTitle">Pautan Utama</span>
+        <span class="topbar-badge" id="pubLinkCountBadge" style="display: none;">0 pautan</span>
+      </div>
+
+      <div class="content-area">
+        <!-- BANNER -->
+        <div id="pubBanner" class="content-banner hidden">
+          <img id="pubBannerImg" src="" alt="Banner" class="content-banner-img">
+        </div>
+
+        <div id="pubLinkGridWrap">
+          <div class="link-grid" id="pubLinkGrid"></div>
+        </div>
+        <div class="empty-state hidden" id="pubEmptyState">
+          <span class="icon-link" style="font-size:48px;display:inline-block;"></span>
+          <h3>Tiada pautan tersedia</h3>
+          <p>Pautan akan dipaparkan di sini sebaik admin menambahnya.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ PDF VIEWER MODAL ══════════════════════════════════ -->
+<div id="pdfModal" class="pdf-modal-overlay hidden">
+  <div class="pdf-modal-box">
+    <div class="pdf-modal-header">
+      <span class="icon-file-pdf" style="font-size:16px;flex-shrink:0;color:#fca5a5;"></span>
+      <span id="pdfModalTitle" class="pdf-modal-title">Dokumen PDF</span>
+      <div class="pdf-modal-actions">
+        <a id="pdfOpenNewTab" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08);">
+          <span class="icon-external"></span> Tab Baharu
+        </a>
+        <button id="pdfModalClose" class="pdf-modal-close-btn" aria-label="Tutup">
+          <span class="icon-x"></span>
+        </button>
+      </div>
+    </div>
+    <div class="pdf-modal-loading" id="pdfModalLoading">
+      <div class="spinner"></div>
+      <p>Memuatkan dokumen...</p>
+    </div>
+    <div class="pdf-modal-body">
+      <iframe id="pdfIframe" title="Paparan PDF" allowfullscreen></iframe>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ IMAGE VIEWER MODAL (pinch-to-zoom) ══════════════════════════════════ -->
+<div id="imgModal" class="img-modal-overlay hidden">
+  <div class="img-modal-box">
+    <div class="img-modal-header">
+      <span class="icon-image" style="font-size:16px;flex-shrink:0;color:#93c5fd;"></span>
+      <span id="imgModalTitle" class="img-modal-title">Imej</span>
+      <div class="img-modal-actions">
+        <a id="imgOpenNewTab" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-sm" style="color:#fff;border-color:rgba(255,255,255,.2);background:rgba(255,255,255,.08);">
+          <span class="icon-external"></span> Tab Baharu
+        </a>
+        <button id="imgModalClose" class="img-modal-close-btn" aria-label="Tutup">
+          <span class="icon-x"></span>
+        </button>
+      </div>
+    </div>
+    <div class="img-modal-loading" id="imgModalLoading">
+      <div class="spinner"></div>
+      <p>Memuatkan imej...</p>
+    </div>
+    <div class="img-modal-body">
+      <img id="imgViewerImg" alt="Paparan imej">
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ NOTA VIEWER MODAL (Awam) ══════════════════════════════════ -->
+<div id="noteModal" class="note-modal-overlay hidden">
+  <div class="note-modal-box">
+    <div class="note-modal-header">
+      <span class="icon-note" style="font-size:16px;flex-shrink:0;color:#93c5fd;"></span>
+      <span id="noteModalTitle" class="note-modal-title">Nota</span>
+      <button id="noteModalClose" class="note-modal-close-btn" aria-label="Tutup">
+        <span class="icon-x"></span>
+      </button>
+    </div>
+    <div class="note-modal-body" id="noteModalBody"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ NOTA EDITOR MODAL - WYSIWYG (Admin) ══════════════════════════════════ -->
+<div id="noteEditorModal" class="note-editor-overlay hidden">
+  <div class="note-editor-box">
+    <div class="note-editor-header">
+      <span class="icon-edit-3" style="font-size:15px;flex-shrink:0;color:#93c5fd;"></span>
+      <span class="note-editor-title">Edit Nota (dipaparkan bila URL dikosongkan)</span>
+      <button id="noteEditorClose" class="note-editor-close-btn" aria-label="Tutup">
+        <span class="icon-x"></span>
+      </button>
+    </div>
+    <div class="note-editor-toolbar">
+      <button type="button" data-cmd="bold" title="Tebal (Bold)"><b>B</b></button>
+      <button type="button" class="italic-btn" data-cmd="italic" title="Condong (Italic)">I</button>
+      <button type="button" class="underline-btn" data-cmd="underline" title="Garis Bawah">U</button>
+      <div class="toolbar-sep"></div>
+      <button type="button" data-cmd="insertUnorderedList" title="Senarai Bullet">• List</button>
+      <button type="button" data-cmd="insertOrderedList" title="Senarai Bernombor">1. List</button>
+      <div class="toolbar-sep"></div>
+      <button type="button" data-cmd="formatBlock" data-val="H3" title="Tajuk Kecil">H3</button>
+      <button type="button" data-cmd="createLink" title="Sisip Pautan">🔗 Pautan</button>
+      <button type="button" data-cmd="removeFormat" title="Kosongkan Format">Bersih</button>
+    </div>
+    <div class="note-editor-body" id="noteEditorBody" contenteditable="true" data-placeholder="Taip kandungan nota di sini..."></div>
+    <div class="note-editor-footer">
+      <button type="button" class="btn btn-outline btn-sm" id="noteEditorCancel">Batal</button>
+      <button type="button" class="btn btn-emerald btn-sm" id="noteEditorSave"><span class="icon-save"></span> Simpan Nota</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ LOGIN MODAL ══════════════════════════════════ -->
+<div id="loginModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <div class="modal-icon-circle"><span class="icon-lock" style="font-size:22px;"></span></div>
+    <h2 class="modal-title">Selamat Kembali</h2>
+    <p class="modal-sub">Masukkan kata laluan untuk akses panel admin</p>
+
+    <form id="loginForm">
+      <div class="form-group" style="margin-bottom:14px;">
+        <label class="form-label">Kata Laluan</label>
+        <input type="password" id="passwordInput" class="form-input" placeholder="Masukkan kata laluan" required>
+      </div>
+
+      <div id="loginError" class="modal-error hidden">Kata laluan salah. Sila cuba lagi.</div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:8px;">Log Masuk</button>
+      <button type="button" id="cancelLoginBtn" class="btn btn-secondary" style="width:100%;justify-content:center;">Batal</button>
+    </form>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ ADMIN DASHBOARD ══════════════════════════════════ -->
+<div id="adminDashboard" class="hidden">
+  <div class="app-shell">
+    <div class="sidebar-overlay" id="adminOverlay" onclick="closeAdminSidebar()"></div>
+
+    <aside class="sidebar" id="adminSidebar">
+      <div class="sb-header">
+        <img class="sb-logo" src="https://i.postimg.cc/qBcGF2Ww/Logo-SK-Adin.png" alt="Logo">
+        <div class="sb-header-text">
+          <div class="sb-title">Panel Admin</div>
+          <div class="sb-school">Pautan Link SK Adin</div>
+        </div>
+      </div>
+
+      <nav class="sb-nav">
+        <div class="sb-section-label">Menu Admin</div>
+        <button class="nav-item active" data-tab="main"><span class="icon-home"></span><span class="nav-item-label">Utama</span></button>
+        <button class="nav-item" data-tab="links"><span class="icon-link"></span><span class="nav-item-label">Pautan</span></button>
+        <button class="nav-item" data-tab="categories"><span class="icon-folder"></span><span class="nav-item-label">Pautan Kategori</span></button>
+        <button class="nav-item" data-tab="bulk"><span class="icon-table"></span><span class="nav-item-label">Edit Link Pukal</span></button>
+        <button class="nav-item" data-tab="appearance"><span class="icon-palette"></span><span class="nav-item-label">Rupa</span></button>
+      </nav>
+
+      <div class="sb-footer">
+        <button class="nav-item accent" id="viewLiveBtn"><span class="icon-eye"></span><span class="nav-item-label">Lihat Laman Web</span></button>
+        <button class="nav-item danger" id="logoutBtn"><span class="icon-logout"></span><span class="nav-item-label">Log Keluar</span></button>
+      </div>
+    </aside>
+
+    <div class="admin-row">
+      <div class="main-area">
+        <div class="topbar">
+          <button class="hamburger-btn" id="adminHamburgerBtn" onclick="openAdminSidebar()">
+            <span class="icon-menu"></span>
+          </button>
+          <span class="topbar-title" id="adminTopbarTitle">Papan Pemuka</span>
+          <span class="topbar-badge" style="background:#d1fae5;color:var(--emerald-700);border-color:#a7f3d0;">
+            <span class="icon-database"></span> Google Sheets · Auto-sync
+          </span>
+        </div>
+
+        <div class="content-area">
+
+          <!-- TAB: UTAMA -->
+          <div class="tab-view active" id="mainTab">
+            <div class="sec-heading">Papan Pemuka</div>
+            <p class="sec-sub">Ringkasan pautan dan kategori anda</p>
+
+            <div class="stat-grid">
+              <div class="stat-card">
+                <div><div class="stat-label">Jumlah Pautan</div><div class="stat-value" id="statTotalLinks">0</div></div>
+                <div class="stat-icon blue"><span class="icon-link" style="font-size:18px;"></span></div>
+              </div>
+              <div class="stat-card">
+                <div><div class="stat-label">Pautan Aktif</div><div class="stat-value" id="statActiveLinks">0</div></div>
+                <div class="stat-icon emerald"><span class="icon-check" style="font-size:18px;"></span></div>
+              </div>
+              <div class="stat-card">
+                <div><div class="stat-label">Jumlah Kategori</div><div class="stat-value" id="statTotalCategories">0</div></div>
+                <div class="stat-icon amber"><span class="icon-folder" style="font-size:18px;"></span></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-header"><span class="card-title"><span class="icon-link"></span>Ringkasan Pautan Anda</span></div>
+              <div class="card-body" style="padding:0;"><div id="linksTableContainer"></div></div>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><span class="card-title"><span class="icon-zap"></span>Tindakan Pantas</span></div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+                <button class="quick-action-btn btn btn-secondary" style="justify-content:flex-start;" data-tab="links"><span class="icon-plus"></span> Tambah Pautan Baharu</button>
+                <button class="quick-action-btn btn btn-secondary" style="justify-content:flex-start;" data-tab="categories"><span class="icon-folder"></span> Urus Kategori</button>
+                <button class="quick-action-btn btn btn-secondary" style="justify-content:flex-start;" data-tab="appearance"><span class="icon-palette"></span> Ubah Rupa</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: PAUTAN -->
+          <div class="tab-view" id="linksTab">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px;">
+              <div>
+                <div class="sec-heading" style="margin-bottom:0;">Pengurusan Pautan</div>
+                <p class="sec-sub" style="margin-bottom:0;">Tambah, susun &amp; kemas kini pautan individu</p>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-emerald" id="saveLinksBtn"><span class="icon-save"></span> Simpan</button>
+                <button class="btn btn-primary" id="addLinkBtn"><span class="icon-plus"></span> Tambah Pautan</button>
+              </div>
+            </div>
+            <div style="height:14px;"></div>
+            <div id="linksEditorContainer"></div>
+          </div>
+
+          <!-- TAB: PAUTAN KATEGORI -->
+          <div class="tab-view" id="categoriesTab">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+              <div>
+                <div class="sec-heading" style="margin-bottom:0;">Pautan Kategori</div>
+                <p class="sec-sub" style="margin-bottom:0;">Susun pautan anda mengikut kategori untuk paparan yang lebih teratur</p>
+              </div>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-emerald" id="saveCategoriesBtn"><span class="icon-save"></span> Simpan</button>
+                <button class="btn btn-primary" id="addCategoryBtn"><span class="icon-plus"></span> Tambah Kategori</button>
+              </div>
+            </div>
+            <div style="height:16px;"></div>
+            <div class="hint-banner" style="margin-bottom:18px;">
+              <span class="icon-lightbulb"></span>
+              <span>
+                <strong>Cara Guna Kategori:</strong>
+                <ul>
+                  <li>Aktifkan kategori untuk papar sebagai menu di sidebar laman web</li>
+                  <li>Kategori tidak aktif tidak akan dipaparkan di laman web</li>
+                  <li>Assign kategori ke pautan di tab "Pautan" atau "Edit Link Pukal"</li>
+                  <li>Pautan tanpa kategori akan kekal disenaraikan terus di sidebar</li>
+                </ul>
+              </span>
+            </div>
+            <div id="categoriesListContainer"></div>
+          </div>
+
+          <!-- TAB: EDIT LINK PUKAL -->
+          <div class="tab-view" id="bulkTab">
+            <div class="sec-heading">Edit Link Pukal</div>
+            <p class="sec-sub">Kemas kini banyak pautan serentak dalam satu jadual</p>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title"><span class="icon-table"></span>Senarai Pautan</span>
+                <button class="btn btn-emerald btn-sm" id="saveBulkBtn"><span class="icon-save"></span> Simpan Semua</button>
+              </div>
+              <div class="card-body" style="padding:0;overflow-x:auto;">
+                <table class="simple-table" id="bulkLinksTable" style="min-width:760px;">
+                  <thead>
+                    <tr>
+                      <th>Susunan</th><th>Aktif</th><th style="min-width:150px;">Kategori</th>
+                      <th style="min-width:200px;">Tajuk</th><th>Pautan</th><th>Warna</th><th>Warna Teks</th><th>Tindakan</th>
+                    </tr>
+                  </thead>
+                  <tbody id="bulkLinksTableBody"></tbody>
+                </table>
+                <div id="bulkEmptyState" class="empty-state hidden">
+                  <span class="icon-table" style="font-size:44px;display:inline-block;"></span>
+                  <h3>Tiada pautan lagi</h3>
+                  <p>Mulakan dengan menambah pautan pertama anda</p>
+                  <button class="btn btn-primary" onclick="addBulkRow()" style="margin:0 auto;"><span class="icon-plus"></span> Tambah Pautan Pertama</button>
+                </div>
+              </div>
+            </div>
+            <div style="height:10px;"></div>
+            <button class="btn btn-outline btn-sm" id="addBulkRowBtn"><span class="icon-plus"></span> Tambah Baris</button>
+
+            <div style="height:16px;"></div>
+            <div class="info-banner">
+              <span class="icon-info"></span>
+              <span>
+                <strong>Tips:</strong>
+                <ul>
+                  <li>Guna butang naik/turun untuk menyusun kedudukan pautan</li>
+                  <li>Semua perubahan akan auto-sync dengan Google Sheets selepas disimpan</li>
+                  <li>Klik "Simpan Semua" untuk simpan semua perubahan sekaligus</li>
+                </ul>
+              </span>
+            </div>
+          </div>
+
+          <!-- TAB: RUPA -->
+          <div class="tab-view" id="appearanceTab">
+            <div class="sec-heading">Ubah Rupa</div>
+            <p class="sec-sub">Sesuaikan profil dan warna laman pautan anda</p>
+
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-header"><span class="card-title"><span class="icon-user"></span>Profil &amp; Avatar</span></div>
+              <div class="card-body">
+                <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+                  <div id="avatarPreview" style="width:64px;height:64px;border-radius:50%;overflow:hidden;background:var(--slate-100);display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
+                  <div style="flex:1;min-width:220px;">
+                    <label class="form-label">URL Gambar Avatar</label>
+                    <input type="url" id="avatarUrlInput" class="form-input" placeholder="https://contoh.com/logo.png">
+                  </div>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label class="form-label">Bentuk Avatar</label>
+                  <div style="display:flex;gap:8px;">
+                    <button class="btn btn-outline avatar-shape-btn" id="shapeCircleBtn" data-shape="circle"><span class="icon-circle"></span> Bulat</button>
+                    <button class="btn btn-outline avatar-shape-btn" id="shapeSquareBtn" data-shape="square"><span class="icon-square"></span> Segi Empat</button>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Tajuk Halaman</label>
+                    <input type="text" id="pageTitleInput" class="form-input">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Deskripsi</label>
+                    <input type="text" id="descriptionInput" class="form-input">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-header">
+                <span class="card-title"><span class="icon-image"></span>Banner Utama</span>
+                <label class="active-toggle-label" style="gap:10px;">
+                  <span style="font-size:12px;color:var(--slate-600);font-weight:600;">Papar Banner</span>
+                  <div class="toggle-switch" id="bannerActiveToggle"></div>
+                </label>
+              </div>
+              <div class="card-body" id="bannerSettingsBody">
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">URL Imej Banner</label>
+                  <input type="url" id="bannerUrlInput" class="form-input" placeholder="https://contoh.com/banner.jpg">
+                  <p style="font-size:11px;color:var(--slate-500);margin-top:5px;">Syor: lebar <strong>1200px ke atas</strong>, sebarang ketinggian. Banner akan skala automatik tanpa crop pada semua paparan. Format: JPG, PNG, WebP, GIF.</p>
+                </div>
+                <div id="bannerPreviewWrap" class="hidden">
+                  <label class="form-label" style="margin-bottom:6px;">Pratonton Banner</label>
+                  <div class="content-banner" style="margin-bottom:0;">
+                    <img id="bannerPreviewImg" src="" alt="Pratonton Banner" class="content-banner-img" onerror="this.parentElement.innerHTML='<div class=\'content-banner-placeholder\'><p>Gambar tidak dapat dimuatkan — semak URL</p></div>';">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-banner">
+              <span class="icon-info"></span>
+              <span>Sidebar laman pautan ditetapkan gelap (slate) secara kekal untuk konsistensi visual dengan reka bentuk rasmi sekolah, dan tidak boleh ditukar di sini.</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PREVIEW PANEL -->
+      <div class="preview-panel">
+        <div class="preview-panel-title">Pratonton Mobile (Live)</div>
+        <div class="mobile-frame">
+          <iframe id="previewFrame" class="mobile-frame-iframe" title="Pratonton laman pautan"></iframe>
+        </div>
+        <button class="btn btn-outline btn-sm" id="refreshPreviewBtn" style="width:100%;justify-content:center;margin-top:10px;">
+          <span class="icon-refresh"></span> Muat Semula Pratonton
+        </button>
+        <p style="font-size:10px;color:var(--slate-500);text-align:center;margin-top:8px;">Paparan sebenar laman awam pada lebar mobile</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ========================================
+  // GOOGLE APPS SCRIPT WEB APP URL
+  // ========================================
+  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzv7U_zPXhJR6PENaWBW87m2Arit55upqO3C5xIpgA5VO-JI5G3kmt2YVn_ENnRhNhd/exec';
+
+  // ========================================
+  // GLOBAL STATE
+  // ========================================
+  const state = {
+    isAuthenticated: false,
+    currentTab: 'main',
+    activeCategoryId: null,
+    profile: {
+      pageTitle: 'SK ADIN',
+      avatarUrl: 'https://i.postimg.cc/qBcGF2Ww/Logo-SK-Adin.png',
+      avatarShape: 'circle',
+      description: 'Pautan link penting kegunaan warga sekolah.',
+      bgColor: '#0f172a',
+      textColor: '#ffffff',
+      bannerUrl: '',
+      bannerActive: false
+    },
+    links: [],
+    categories: [],
+    hasUnsavedChanges: false
+  };
+
+  // ========================================
+  // IKON SVG (feather-style, ringan & konsisten)
+  // ========================================
+  const ICONS = {
+    lock: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    info: '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>',
+    menu: '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    home: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    folder: '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+    table: '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>',
+    palette: '<circle cx="13.5" cy="6.5" r=".6"/><circle cx="17.5" cy="10.5" r=".6"/><circle cx="8.5" cy="7.5" r=".6"/><circle cx="6.5" cy="12.5" r=".6"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.67 0-.43-.18-.82-.39-1.18-.2-.35-.43-.71-.43-1.17a1.64 1.64 0 0 1 1.65-1.65h1.95C19.4 16.33 22 13.75 22 10.7 22 5.9 17.5 2 12 2z"/>',
+    eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+    logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
+    save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>',
+    plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    check: '<polyline points="20 6 9 17 4 12"/>',
+    zap: '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+    user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    circle: '<circle cx="12" cy="12" r="9"/>',
+    square: '<rect x="4" y="4" width="16" height="16" rx="2"/>',
+    database: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
+    lightbulb: '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/>',
+    trash: '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>',
+    'arrow-up': '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
+    'arrow-down': '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>',
+    grip: '<circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/>',
+    external: '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>',
+    x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    refresh: '<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
+    image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>',
+    'file-pdf': '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15v-4"/><path d="M12 15v-6"/><path d="M15 15v-2"/>',
+    note: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>',
+    'edit-3': '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>'
+  };
+
+  function renderIcons(scope) {
+    (scope || document).querySelectorAll('[class^="icon-"]').forEach(el => {
+      const name = el.className.split(' ')[0].replace('icon-', '');
+      if (ICONS[name] && !el.dataset.iconDone) {
+        el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;">' + ICONS[name] + '</svg>';
+        el.dataset.iconDone = '1';
+      }
+    });
+  }
+
+  // ========================================
+  // UTILITY FUNCTIONS
+  // ========================================
+  function showElement(id) { const el = document.getElementById(id); if (el) el.classList.remove('hidden'); }
+  function hideElement(id) { const el = document.getElementById(id); if (el) el.classList.add('hidden'); }
+
+  function showToast(message, type) {
+    type = type || 'success';
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    const iconName = type === 'success' ? 'check' : (type === 'error' ? 'x' : 'info');
+    toast.innerHTML = '<span class="icon-' + iconName + '"></span><span>' + message + '</span>';
+    container.appendChild(toast);
+    renderIcons(toast);
+    setTimeout(() => {
+      toast.style.transition = 'opacity .25s ease';
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 250);
+    }, type === 'error' ? 4000 : 2800);
+  }
+
+  function showLoading(message) {
+    document.getElementById('loadingMessage').textContent = message;
+    showElement('loadingOverlay');
+  }
+  function hideLoading() { hideElement('loadingOverlay'); }
+
+  function escapeHtml(text) {
+    if (!text) return '';
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+  }
+
+  function openPubSidebar() { document.getElementById('pubSidebar').classList.add('open'); document.getElementById('pubOverlay').classList.add('show'); }
+  function closePubSidebar() { document.getElementById('pubSidebar').classList.remove('open'); document.getElementById('pubOverlay').classList.remove('show'); }
+  function openAdminSidebar() { document.getElementById('adminSidebar').classList.add('open'); document.getElementById('adminOverlay').classList.add('show'); }
+  function closeAdminSidebar() { document.getElementById('adminSidebar').classList.remove('open'); document.getElementById('adminOverlay').classList.remove('show'); }
+
+  // ========================================
+  // API COMMUNICATION (FETCH)
+  // ========================================
+  async function apiCall(action, data = {}) {
+    try {
+      const response = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ action: action, data: JSON.stringify(data) })
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('API Error:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async function loadAllData() {
+    showLoading('Memuatkan data...');
+    const result = await apiCall('getAllData');
+    hideLoading();
+    if (result.success) {
+      if (result.data.profile) state.profile = result.data.profile;
+      state.links = result.data.links || [];
+      state.categories = result.data.categories || [];
+      const urlCat = new URLSearchParams(location.search).get('cat');
+      if (urlCat && !state.activeCategoryId) state.activeCategoryId = urlCat;
+      renderAll();
+    } else {
+      showToast('Ralat memuatkan data: ' + result.error, 'error');
+    }
+  }
+
+  async function saveProfile() {
+    showLoading('Menyimpan profil...');
+    const result = await apiCall('saveProfile', state.profile);
+    hideLoading();
+    if (result.success) { showToast('Profil disimpan!', 'success'); setupPreviewFrame(); }
+    else showToast('Ralat: ' + result.error, 'error');
+  }
+
+  async function saveLinks() {
+    showLoading('Menyimpan pautan ke Google Sheets...');
+    const result = await apiCall('saveLinks', state.links);
+    hideLoading();
+    if (result.success) {
+      showToast('Pautan disimpan!', 'success');
+      state.hasUnsavedChanges = false;
+      renderDashboardStats();
+      renderPublicView();
+      setupPreviewFrame();
+    } else {
+      showToast('Ralat: ' + result.error, 'error');
+    }
+  }
+
+  async function saveCategories() {
+    showLoading('Menyimpan kategori ke Google Sheets...');
+    const result = await apiCall('saveCategories', state.categories);
+    hideLoading();
+    if (result.success) {
+      showToast('Kategori disimpan!', 'success');
+      renderDashboardStats();
+      renderPublicView();
+      setupPreviewFrame();
+    } else {
+      showToast('Ralat: ' + result.error, 'error');
+    }
+  }
+
+  async function verifyPasswordRemote(password) {
+    const result = await apiCall('verifyPassword', { password: password });
+    return result.isValid;
+  }
+
+  // ========================================
+  // RENDER: SEMUA
+  // ========================================
+  function renderAll() {
+    renderPublicView();
+    renderAdminPreview();
+    renderDashboardStats();
+    if (state.currentTab === 'links') renderLinksEditor();
+    else if (state.currentTab === 'appearance') renderAppearance();
+    else if (state.currentTab === 'bulk') renderBulkLinks();
+    else if (state.currentTab === 'categories') renderCategories();
+  }
+
+  // ========================================
+  // PDF VIEWER HELPER
+  // ========================================
+  function isPdfLink(url) {
+    if (!url) return false;
+    const lower = url.toLowerCase();
+    // Sambungan .pdf secara langsung
+    if (/\.pdf(\?|#|$)/.test(lower)) return true;
+    // Google Drive file (semua jenis, termasuk PDF yang disimpan di Drive)
+    if (lower.includes('drive.google.com/file/')) return true;
+    if (lower.includes('drive.google.com/open')) return true;
+    if (lower.includes('docs.google.com/presentation') && lower.includes('/pub')) return false; // bukan PDF
+    return false;
+  }
+
+  function getPdfEmbedUrl(url) {
+    // Google Drive fail → tukar ke format /preview (ada pinch-to-zoom native, stabil)
+    const driveFile = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (driveFile) return 'https://drive.google.com/file/d/' + driveFile[1] + '/preview';
+    // Google Drive open?id= → tukar ke /preview
+    const driveOpen = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (driveOpen && url.includes('drive.google.com')) return 'https://drive.google.com/file/d/' + driveOpen[1] + '/preview';
+    // PDF terus lain → guna PDF.js Mozilla (viewer stabil, pinch-zoom native tanpa reload-loop).
+    // NOTA: docs.google.com/viewer sengaja dielakkan kerana skrip dalamannya render semula
+    // secara agresif apabila resize/pinch berlaku pada mobile, punca "auto reload" & crash.
+    return 'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent(url);
+  }
+
+  let pdfViewerToken = 0; // elak onload/timeout lapuk cetus semula selepas modal ditutup & dibuka lagi
+
+  function openPdfViewer(url, title) {
+    const modal = document.getElementById('pdfModal');
+    const iframe = document.getElementById('pdfIframe');
+    const loading = document.getElementById('pdfModalLoading');
+    const myToken = ++pdfViewerToken;
+
+    document.getElementById('pdfModalTitle').textContent = title || 'Dokumen PDF';
+    document.getElementById('pdfOpenNewTab').href = url;
+
+    loading.classList.remove('hidden');
+    iframe.onload = null;     // buang handler lama dulu supaya tak bertindih
+    iframe.src = 'about:blank';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    requestAnimationFrame(() => {
+      if (myToken !== pdfViewerToken) return; // modal dah ditutup/tukar sebelum frame ini sempat jalan
+      iframe.src = getPdfEmbedUrl(url);
+    });
+
+    // Sembunyikan loading HANYA sekali apabila iframe benar-benar siap (atau fallback 6 saat)
+    iframe.onload = () => {
+      if (myToken !== pdfViewerToken) return;
+      loading.classList.add('hidden');
+      iframe.onload = null; // pastikan tak retrigger walaupun iframe reload semula secara dalaman
+    };
+    setTimeout(() => { if (myToken === pdfViewerToken) loading.classList.add('hidden'); }, 6000);
+  }
+
+  function closePdfViewer() {
+    pdfViewerToken++; // batalkan sebarang onload/timeout tertangguh drpd sesi lama
+    document.getElementById('pdfModal').classList.add('hidden');
+    document.getElementById('pdfIframe').onload = null;
+    document.getElementById('pdfIframe').src = 'about:blank';
+    document.body.style.overflow = '';
+  }
+
+  // ========================================
+  // IMAGE VIEWER HELPER (pinch-to-zoom)
+  // ========================================
+  function isImageLink(url) {
+    if (!url) return false;
+    const lower = url.toLowerCase();
+    // Sambungan imej biasa secara langsung
+    if (/\.(png|jpe?g|gif|webp|svg|bmp|avif)(\?|#|$)/.test(lower)) return true;
+    // Google Drive fail imej (uc?export=view / thumbnail dsb) - hanya jika ada isyarat "image" pada url
+    if (lower.includes('drive.google.com/uc') && lower.includes('export=view')) return true;
+    if (lower.includes('lh3.googleusercontent.com')) return true;
+    return false;
+  }
+
+  let imgViewerToken = 0; // elak onload/timeout lapuk cetus semula selepas modal ditutup & dibuka lagi
+
+  function openImageViewer(url, title) {
+    const modal = document.getElementById('imgModal');
+    const imgEl = document.getElementById('imgViewerImg');
+    const loading = document.getElementById('imgModalLoading');
+    const myToken = ++imgViewerToken;
+
+    document.getElementById('imgModalTitle').textContent = title || 'Imej';
+    document.getElementById('imgOpenNewTab').href = url;
+
+    loading.classList.remove('hidden');
+    imgEl.onload = null;      // buang handler lama dulu supaya tak bertindih
+    imgEl.onerror = null;
+    imgEl.src = '';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+
+    requestAnimationFrame(() => {
+      if (myToken !== imgViewerToken) return; // modal dah ditutup/tukar sebelum frame ini sempat jalan
+      imgEl.src = url;
+    });
+
+    // Sembunyikan loading HANYA sekali apabila imej benar-benar siap (atau gagal / fallback masa)
+    imgEl.onload = () => {
+      if (myToken !== imgViewerToken) return;
+      loading.classList.add('hidden');
+      imgEl.onload = null;
+    };
+    imgEl.onerror = () => {
+      if (myToken !== imgViewerToken) return;
+      loading.classList.add('hidden');
+      loading.querySelector('p').textContent = 'Gagal memuatkan imej.';
+    };
+    setTimeout(() => { if (myToken === imgViewerToken) loading.classList.add('hidden'); }, 6000);
+  }
+
+  function closeImageViewer() {
+    imgViewerToken++; // batalkan sebarang onload/timeout tertangguh drpd sesi lama
+    document.getElementById('imgModal').classList.add('hidden');
+    const imgEl = document.getElementById('imgViewerImg');
+    imgEl.onload = null;
+    imgEl.onerror = null;
+    imgEl.src = '';
+    document.body.style.overflow = '';
+  }
+
+  // ========================================
+  // NOTA (WYSIWYG) HELPER
+  // Pautan tanpa URL akan bertukar mod menjadi "Nota": klik akan membuka
+  // tetingkap (modal) memaparkan kandungan teks yang telah diedit oleh admin,
+  // dan bukannya menavigasi ke luar.
+  // ========================================
+  function isNoteLink(link) {
+    return !link.url || !link.url.trim();
+  }
+
+  function openNoteViewer(note, title) {
+    const modal = document.getElementById('noteModal');
+    document.getElementById('noteModalTitle').textContent = title || 'Nota';
+    document.getElementById('noteModalBody').innerHTML = note || '';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeNoteViewer() {
+    document.getElementById('noteModal').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // ── Editor Nota (Admin) ──
+  let noteEditingIndex = null;
+
+  function openNoteEditor(index) {
+    noteEditingIndex = index;
+    const link = state.links[index];
+    document.getElementById('noteEditorBody').innerHTML = link.note || '';
+    document.getElementById('noteEditorModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeNoteEditor() {
+    noteEditingIndex = null;
+    document.getElementById('noteEditorModal').classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  function saveNoteEditor() {
+    if (noteEditingIndex === null) return;
+    const html = document.getElementById('noteEditorBody').innerHTML;
+    state.links[noteEditingIndex].note = html;
+    closeNoteEditor();
+    renderLinksEditor();
+    renderAdminPreview();
+    showToast('Nota disimpan. Jangan lupa tekan "Simpan" untuk hantar ke pelayan.', 'success');
+  }
+
+  function setupNoteEditorToolbar() {
+    document.querySelectorAll('.note-editor-toolbar button[data-cmd]').forEach(btn => {
+      btn.addEventListener('click', function () {
+        document.getElementById('noteEditorBody').focus();
+        const cmd = this.dataset.cmd;
+        if (cmd === 'createLink') {
+          const url = prompt('Masukkan URL pautan:');
+          if (url) document.execCommand('createLink', false, url);
+        } else if (cmd === 'formatBlock') {
+          document.execCommand('formatBlock', false, this.dataset.val || 'P');
+        } else {
+          document.execCommand(cmd, false, null);
+        }
+      });
+    });
+  }
+
+  // ========================================
+  // RENDER: PUBLIC VIEW (sidebar kategori + grid utama)
+  // ========================================
+  function renderPublicView() {
+    document.getElementById('pubTitle').textContent = state.profile.pageTitle || 'SK ADIN';
+    document.getElementById('pubDesc').textContent = state.profile.description || 'Pautan Link';
+    const logo = document.getElementById('pubLogo');
+    logo.src = state.profile.avatarUrl || 'https://i.postimg.cc/qBcGF2Ww/Logo-SK-Adin.png';
+
+    // Banner
+    const banner = document.getElementById('pubBanner');
+    const bannerImg = document.getElementById('pubBannerImg');
+    if (state.profile.bannerActive && state.profile.bannerUrl) {
+      banner.classList.remove('hidden');
+      banner.innerHTML = ''; // reset
+      const img = document.createElement('img');
+      img.className = 'content-banner-img';
+      img.alt = 'Banner';
+      img.src = state.profile.bannerUrl;
+      img.onerror = function () {
+        banner.innerHTML = '<div class="content-banner-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Gambar tidak dapat dimuatkan</p></div>';
+      };
+      banner.appendChild(img);
+    } else {
+      banner.classList.add('hidden');
+    }
+
+    const activeCategories = state.categories.filter(c => c.active);
+    const activeLinks = state.links.filter(l => l.active);
+    const linksNoCat = activeLinks.filter(l => !l.categoryId);
+    const catsWithLinks = activeCategories.filter(c => activeLinks.some(l => l.categoryId === c.id));
+
+    const catNavWrap = document.getElementById('pubCategoryNavWrap');
+    const catNav = document.getElementById('pubCategoryNav');
+    const noCatWrap = document.getElementById('pubNoCatNavWrap');
+    const noCatNav = document.getElementById('pubNoCatNav');
+    const emptyNav = document.getElementById('pubNavEmptyState');
+
+    catNav.innerHTML = '';
+    noCatNav.innerHTML = '';
+
+    if (catsWithLinks.length === 0 && linksNoCat.length === 0) {
+      catNavWrap.classList.add('hidden');
+      noCatWrap.classList.add('hidden');
+      emptyNav.classList.remove('hidden');
+    } else {
+      emptyNav.classList.add('hidden');
+
+      if (catsWithLinks.length > 0) {
+        catNavWrap.classList.remove('hidden');
+        catsWithLinks.forEach(cat => {
+          const btn = document.createElement('button');
+          btn.className = 'nav-item' + (state.activeCategoryId === cat.id ? ' active' : '');
+          btn.innerHTML = '<span class="nav-item-dot" style="background:' + (cat.color || '#3b82f6') + '"></span><span class="nav-item-label">' + escapeHtml(cat.name) + '</span>';
+          btn.onclick = () => { state.activeCategoryId = cat.id; renderPublicView(); closePubSidebar(); };
+          catNav.appendChild(btn);
+        });
+      } else {
+        catNavWrap.classList.add('hidden');
+      }
+
+      if (linksNoCat.length > 0) {
+        noCatWrap.classList.remove('hidden');
+        linksNoCat.forEach(link => {
+          const isNote = isNoteLink(link);
+          const isPdf = !isNote && isPdfLink(link.url);
+          const isImg = !isNote && !isPdf && isImageLink(link.url);
+          const a = document.createElement('a');
+          a.className = 'nav-item';
+          if (isNote) {
+            a.href = '#';
+            a.addEventListener('click', function(e) { e.preventDefault(); openNoteViewer(link.note, link.title); });
+          } else if (isPdf) {
+            a.href = '#';
+            a.addEventListener('click', function(e) { e.preventDefault(); openPdfViewer(link.url, link.title); });
+          } else if (isImg) {
+            a.href = '#';
+            a.addEventListener('click', function(e) { e.preventDefault(); openImageViewer(link.url, link.title); });
+          } else {
+            a.href = link.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+          }
+          a.innerHTML = '<span class="' + (isNote ? 'icon-note' : (isImg ? 'icon-image' : 'icon-link')) + '"></span>'
+            + '<span class="nav-item-label">' + escapeHtml(link.title || 'Pautan Tanpa Tajuk') + '</span>'
+            + (isNote ? '<span class="img-badge">Nota</span>' : (isPdf ? '<span class="pdf-badge">PDF</span>' : (isImg ? '<span class="img-badge">Imej</span>' : '<span class="icon-external nav-item-ext" style="font-size:11px;"></span>')));
+          noCatNav.appendChild(a);
+        });
+      } else {
+        noCatWrap.classList.add('hidden');
+      }
+      renderIcons(noCatNav);
+    }
+
+    if (!state.activeCategoryId || !catsWithLinks.find(c => c.id === state.activeCategoryId)) {
+      state.activeCategoryId = catsWithLinks.length > 0 ? catsWithLinks[0].id : null;
+      Array.from(catNav.children).forEach((btn, i) => btn.classList.toggle('active', catsWithLinks[i] && catsWithLinks[i].id === state.activeCategoryId));
+    }
+
+    renderPublicMain(activeLinks, catsWithLinks);
+  }
+
+  function renderPublicMain(activeLinks, catsWithLinks) {
+    const grid = document.getElementById('pubLinkGrid');
+    const gridWrap = document.getElementById('pubLinkGridWrap');
+    const titleEl = document.getElementById('pubContentTitle');
+    const badge = document.getElementById('pubLinkCountBadge');
+    const emptyState = document.getElementById('pubEmptyState');
+    grid.innerHTML = '';
+
+    let linksToShow = [];
+    if (state.activeCategoryId) {
+      const cat = state.categories.find(c => c.id === state.activeCategoryId);
+      titleEl.textContent = cat ? cat.name : 'Pautan';
+      linksToShow = activeLinks.filter(l => l.categoryId === state.activeCategoryId);
+    } else {
+      titleEl.textContent = 'Pautan Utama';
+    }
+    badge.textContent = linksToShow.length + ' pautan';
+
+    if (linksToShow.length === 0) {
+      gridWrap.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      emptyState.querySelector('p').textContent = catsWithLinks.length === 0
+        ? 'Semua pautan tersedia disenaraikan terus di sidebar.'
+        : 'Pilih kategori di sidebar untuk lihat pautan.';
+      return;
+    }
+    gridWrap.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+
+    linksToShow.forEach(link => {
+      const accent = link.color || '#3b82f6';
+      const iconColor = link.textColor || '#ffffff';
+      const isNote = isNoteLink(link);
+      const isPdf = !isNote && isPdfLink(link.url);
+      const isImg = !isNote && !isPdf && isImageLink(link.url);
+      const a = document.createElement('a');
+      a.className = 'link-card';
+      a.style.borderLeftColor = accent;
+      if (isNote) {
+        a.href = '#';
+        a.addEventListener('click', function(e) { e.preventDefault(); openNoteViewer(link.note, link.title); });
+      } else if (isPdf) {
+        a.href = '#';
+        a.addEventListener('click', function(e) { e.preventDefault(); openPdfViewer(link.url, link.title); });
+      } else if (isImg) {
+        a.href = '#';
+        a.addEventListener('click', function(e) { e.preventDefault(); openImageViewer(link.url, link.title); });
+      } else {
+        a.href = link.url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+      }
+      a.innerHTML = '<span class="link-card-icon" style="background:' + accent + ';color:' + iconColor + ';">'
+        + '<span class="' + (isNote ? 'icon-note' : (isPdf ? 'icon-file-pdf' : (isImg ? 'icon-image' : 'icon-link'))) + '"></span></span>'
+        + '<span class="link-card-title">' + escapeHtml(link.title || 'Pautan Tanpa Tajuk') + '</span>'
+        + (isNote ? '<span class="img-badge">Nota</span>' : (isPdf ? '<span class="pdf-badge">PDF</span>' : (isImg ? '<span class="img-badge">Imej</span>' : '<span class="icon-external link-card-ext"></span>')));
+      grid.appendChild(a);
+    });
+    renderIcons(grid);
+  }
+
+  // ========================================
+  // RENDER: PRATONTON ADMIN (iframe + postMessage draf-langsung)
+  // ========================================
+  let previewFrameReady = false;
+
+  function renderAdminPreview() {
+    pushPreviewState();
+  }
+
+  function setupPreviewFrame() {
+    const iframe = document.getElementById('previewFrame');
+    if (!iframe) return;
+    previewFrameReady = false;
+    const baseUrl = window.location.href.split('?')[0];
+    iframe.src = baseUrl + '?preview=1&t=' + Date.now();
+  }
+
+  function pushPreviewState() {
+    const iframe = document.getElementById('previewFrame');
+    if (!iframe || !iframe.contentWindow || !previewFrameReady) return;
+    try {
+      iframe.contentWindow.postMessage({
+        type: 'LB_PREVIEW_STATE',
+        profile: state.profile,
+        links: state.links,
+        categories: state.categories
+      }, '*');
+    } catch (e) { /* abaikan - iframe mungkin belum sedia */ }
+  }
+
+  // ========================================
+  // RENDER: ADMIN - DASHBOARD STATS
+  // ========================================
+  function renderDashboardStats() {
+    document.getElementById('statTotalLinks').textContent = state.links.length;
+    document.getElementById('statActiveLinks').textContent = state.links.filter(l => l.active).length;
+    document.getElementById('statTotalCategories').textContent = state.categories.length;
+
+    const tableContainer = document.getElementById('linksTableContainer');
+    if (state.links.length === 0) {
+      tableContainer.innerHTML = '<div class="empty-state"><span class="icon-link"></span><h3>Tiada pautan dibuat lagi</h3></div>';
+      renderIcons(tableContainer);
+      return;
+    }
+    let html = '<table class="simple-table"><thead><tr><th>Tajuk</th><th>Pautan</th><th>Kategori</th><th style="text-align:center;">Status</th></tr></thead><tbody>';
+    state.links.forEach(link => {
+      const cat = state.categories.find(c => c.id === link.categoryId);
+      html += '<tr><td style="font-weight:600;">' + escapeHtml(link.title || 'Tanpa Tajuk') + '</td>' +
+        '<td style="color:var(--slate-500);max-width:220px;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(link.url) + '</td>' +
+        '<td>' + escapeHtml(cat ? cat.name : '—') + '</td>' +
+        '<td style="text-align:center;"><span class="status-chip ' + (link.active ? 'on' : 'off') + '">' + (link.active ? 'Aktif' : 'Tidak Aktif') + '</span></td></tr>';
+    });
+    html += '</tbody></table>';
+    tableContainer.innerHTML = html;
+  }
+
+  // ========================================
+  // RENDER: ADMIN - RUPA
+  // ========================================
+  function renderAppearance() {
+    const avatarPreview = document.getElementById('avatarPreview');
+    avatarPreview.style.borderRadius = state.profile.avatarShape === 'square' ? '10px' : '50%';
+    if (state.profile.avatarUrl) {
+      avatarPreview.innerHTML = '<img src="' + escapeHtml(state.profile.avatarUrl) + '" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML=\'<span class=&quot;icon-user&quot; style=&quot;font-size:24px;color:var(--slate-400);&quot;></span>\'; renderIcons(this.parentElement);">';
+    } else {
+      avatarPreview.innerHTML = '<span class="icon-user" style="font-size:24px;color:var(--slate-400);"></span>';
+    }
+    renderIcons(avatarPreview);
+
+    document.getElementById('avatarUrlInput').value = state.profile.avatarUrl || '';
+    document.getElementById('shapeCircleBtn').classList.toggle('active', state.profile.avatarShape === 'circle');
+    document.getElementById('shapeSquareBtn').classList.toggle('active', state.profile.avatarShape === 'square');
+    document.querySelectorAll('.avatar-shape-btn').forEach(btn => {
+      btn.style.background = btn.classList.contains('active') ? 'var(--blue-600)' : '';
+      btn.style.color = btn.classList.contains('active') ? '#fff' : '';
+      btn.style.borderColor = btn.classList.contains('active') ? 'var(--blue-600)' : '';
+    });
+
+    document.getElementById('pageTitleInput').value = state.profile.pageTitle || '';
+    document.getElementById('descriptionInput').value = state.profile.description || '';
+
+    // Banner
+    const bannerToggle = document.getElementById('bannerActiveToggle');
+    bannerToggle.classList.toggle('active', !!state.profile.bannerActive);
+    const bannerUrlInput = document.getElementById('bannerUrlInput');
+    bannerUrlInput.value = state.profile.bannerUrl || '';
+    updateBannerPreview();
+  }
+
+  function updateBannerPreview() {
+    const url = state.profile.bannerUrl || '';
+    const wrap = document.getElementById('bannerPreviewWrap');
+    const img = document.getElementById('bannerPreviewImg');
+    if (url) {
+      wrap.classList.remove('hidden');
+      img.src = url;
+    } else {
+      wrap.classList.add('hidden');
+    }
+  }
+
+  function updateLinkPreviewBox(index) {
+    const link = state.links[index];
+    const box = document.querySelector('.link-preview-box[data-index="' + index + '"]');
+    if (box) { box.style.borderLeftColor = link.color || '#3b82f6'; box.style.color = link.textColor || '#3b82f6'; }
+  }
+
+  // ========================================
+  // RENDER: ADMIN - PAUTAN (editor kad)
+  // ========================================
+  function renderLinksEditor() {
+    const container = document.getElementById('linksEditorContainer');
+    if (state.links.length === 0) {
+      container.innerHTML = '<div class="card"><div class="card-body"><div class="empty-state"><span class="icon-link"></span><h3>Tiada pautan lagi</h3><p>Mulakan dengan menambah pautan pertama anda</p><button class="btn btn-primary" onclick="addLink()" style="margin:0 auto;"><span class="icon-plus"></span> Buat Pautan Pertama</button></div></div></div>';
+      renderIcons(container);
+      return;
+    }
+
+    let categoryOptionsBase = '<option value="">— Tiada Kategori —</option>';
+    state.categories.forEach(cat => { categoryOptionsBase += '<option value="' + cat.id + '">' + escapeHtml(cat.name) + '</option>'; });
+
+    let html = '';
+    state.links.forEach((link, index) => {
+      let categoryOptions = '<option value="">— Tiada Kategori —</option>';
+      state.categories.forEach(cat => {
+        categoryOptions += '<option value="' + cat.id + '"' + (link.categoryId === cat.id ? ' selected' : '') + '>' + escapeHtml(cat.name) + '</option>';
+      });
+      html += `
+        <div class="card editor-row">
+          <div class="editor-row-head">
+            <div class="editor-row-head-left"><span class="icon-grip"></span> Pautan #${index + 1}</div>
+            <div class="editor-row-actions">
+              <button class="icon-action-btn move-up-btn" data-index="${index}" ${index === 0 ? 'disabled' : ''}><span class="icon-arrow-up"></span></button>
+              <button class="icon-action-btn move-down-btn" data-index="${index}" ${index === state.links.length - 1 ? 'disabled' : ''}><span class="icon-arrow-down"></span></button>
+              <label class="active-toggle-label">Aktif <div class="toggle-switch ${link.active ? 'active' : ''}" data-index="${index}"></div></label>
+              <button class="icon-action-btn danger delete-link-btn" data-index="${index}"><span class="icon-trash"></span></button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-row cols-1" style="margin-bottom:14px;">
+              <div class="form-group">
+                <label class="form-label">Kategori</label>
+                <select class="form-select link-category-select" data-index="${index}">${categoryOptions}</select>
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:14px;">
+              <div class="form-group">
+                <label class="form-label">Tajuk</label>
+                <input type="text" class="form-input link-title-input" data-index="${index}" value="${escapeHtml(link.title)}" placeholder="Masukkan tajuk pautan">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pautan (URL)</label>
+                <input type="url" class="form-input link-url-input" data-index="${index}" value="${escapeHtml(link.url)}" placeholder="https://contoh.com (kosongkan untuk mod Nota)">
+              </div>
+            </div>
+            <div class="note-hint ${link.url && link.url.trim() ? 'hidden' : ''}" data-index="${index}">
+              <span class="icon-note" style="font-size:16px;color:var(--blue-600);flex-shrink:0;"></span>
+              <p>URL kosong &mdash; pautan ini akan bertukar mod <strong>Nota</strong>. Apabila pengguna klik, tetingkap akan memaparkan teks yang telah anda edit.${link.note ? ' <strong>(Nota sudah ada)</strong>' : ''}</p>
+              <button type="button" class="btn btn-outline btn-sm edit-note-btn" data-index="${index}"><span class="icon-edit-3"></span> Edit Nota</button>
+            </div>
+            <div class="form-row" style="margin-top:14px;">
+              <div class="form-group">
+                <label class="form-label">Warna Aksen (Border &amp; Ikon)</label>
+                <div class="color-field">
+                  <input type="color" class="link-color-picker" data-index="${index}" value="${link.color || '#3b82f6'}">
+                  <input type="text" class="form-input link-color-input" data-index="${index}" value="${link.color || '#3b82f6'}">
+                  <div class="color-preview-chip link-preview-box" data-index="${index}" style="background:#fff;border:1px solid var(--slate-200);border-left:4px solid ${link.color || '#3b82f6'};color:${link.textColor || '#3b82f6'}">●</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Warna Ikon</label>
+                <div class="color-field">
+                  <input type="color" class="link-text-color-picker" data-index="${index}" value="${link.textColor || '#ffffff'}">
+                  <input type="text" class="form-input link-text-color-input" data-index="${index}" value="${link.textColor || '#ffffff'}">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+    renderIcons(container);
+    attachLinkEditorListeners();
+  }
+
+  function attachLinkEditorListeners() {
+    document.querySelectorAll('.link-category-select').forEach(s => s.addEventListener('change', function () { state.links[parseInt(this.dataset.index)].categoryId = this.value || null; renderAdminPreview(); }));
+    document.querySelectorAll('#linksEditorContainer .toggle-switch').forEach(t => t.addEventListener('click', function () { const i = parseInt(this.dataset.index); state.links[i].active = !state.links[i].active; this.classList.toggle('active'); renderAdminPreview(); }));
+    document.querySelectorAll('.delete-link-btn').forEach(b => b.addEventListener('click', function () { deleteLink(parseInt(this.dataset.index)); }));
+    document.querySelectorAll('.link-title-input').forEach(i => i.addEventListener('input', function () { state.links[parseInt(this.dataset.index)].title = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.link-url-input').forEach(i => i.addEventListener('input', function () {
+      const idx = parseInt(this.dataset.index);
+      state.links[idx].url = this.value;
+      const hint = document.querySelector('.note-hint[data-index="' + idx + '"]');
+      if (hint) hint.classList.toggle('hidden', !!this.value.trim());
+      renderAdminPreview();
+    }));
+    document.querySelectorAll('.edit-note-btn').forEach(b => b.addEventListener('click', function () { openNoteEditor(parseInt(this.dataset.index)); }));
+    document.querySelectorAll('.link-color-picker').forEach(p => p.addEventListener('input', function () { const i = parseInt(this.dataset.index); state.links[i].color = this.value; const inp = document.querySelector('.link-color-input[data-index="' + i + '"]'); if (inp) inp.value = this.value; updateLinkPreviewBox(i); renderAdminPreview(); }));
+    document.querySelectorAll('.link-color-input').forEach(i => i.addEventListener('input', function () { const idx = parseInt(this.dataset.index); state.links[idx].color = this.value; const p = document.querySelector('.link-color-picker[data-index="' + idx + '"]'); if (p) p.value = this.value; updateLinkPreviewBox(idx); renderAdminPreview(); }));
+    document.querySelectorAll('.link-text-color-picker').forEach(p => p.addEventListener('input', function () { const i = parseInt(this.dataset.index); state.links[i].textColor = this.value; const inp = document.querySelector('.link-text-color-input[data-index="' + i + '"]'); if (inp) inp.value = this.value; updateLinkPreviewBox(i); renderAdminPreview(); }));
+    document.querySelectorAll('.link-text-color-input').forEach(i => i.addEventListener('input', function () { const idx = parseInt(this.dataset.index); state.links[idx].textColor = this.value; const p = document.querySelector('.link-text-color-picker[data-index="' + idx + '"]'); if (p) p.value = this.value; updateLinkPreviewBox(idx); renderAdminPreview(); }));
+    document.querySelectorAll('.move-up-btn').forEach(b => b.addEventListener('click', function () { if (!this.disabled) moveLink(parseInt(this.dataset.index), 'up'); }));
+    document.querySelectorAll('.move-down-btn').forEach(b => b.addEventListener('click', function () { if (!this.disabled) moveLink(parseInt(this.dataset.index), 'down'); }));
+  }
+
+  // ========================================
+  // RENDER: ADMIN - EDIT LINK PUKAL
+  // ========================================
+  function renderBulkLinks() {
+    const tbody = document.getElementById('bulkLinksTableBody');
+    if (state.links.length === 0) {
+      tbody.innerHTML = '';
+      showElement('bulkEmptyState');
+      return;
+    }
+    hideElement('bulkEmptyState');
+    let html = '';
+    state.links.forEach((link, index) => {
+      let categoryOptions = '<option value="">— Tiada —</option>';
+      state.categories.forEach(cat => { categoryOptions += '<option value="' + cat.id + '"' + (link.categoryId === cat.id ? ' selected' : '') + '>' + escapeHtml(cat.name) + '</option>'; });
+      html += `
+        <tr>
+          <td><div style="display:flex;align-items:center;gap:4px;">
+            <button class="icon-action-btn bulk-move-up" data-index="${index}" ${index === 0 ? 'disabled' : ''}><span class="icon-arrow-up"></span></button>
+            <button class="icon-action-btn bulk-move-down" data-index="${index}" ${index === state.links.length - 1 ? 'disabled' : ''}><span class="icon-arrow-down"></span></button>
+            <span style="font-size:11px;color:var(--slate-500);">#${index + 1}</span>
+          </div></td>
+          <td><div class="toggle-switch bulk-active-toggle ${link.active ? 'active' : ''}" data-index="${index}"></div></td>
+          <td><select class="form-select bulk-category-select" data-index="${index}" style="min-width:140px;">${categoryOptions}</select></td>
+          <td><input type="text" class="form-input bulk-title-input" data-index="${index}" value="${escapeHtml(link.title)}" style="min-width:180px;"></td>
+          <td><input type="url" class="form-input bulk-url-input" data-index="${index}" value="${escapeHtml(link.url)}" style="min-width:180px;"></td>
+          <td><div class="color-field"><input type="color" class="bulk-color-picker" data-index="${index}" value="${link.color || '#3b82f6'}"><input type="text" class="form-input bulk-color-input" data-index="${index}" value="${link.color || '#3b82f6'}" style="width:80px;"></div></td>
+          <td><div class="color-field"><input type="color" class="bulk-text-color-picker" data-index="${index}" value="${link.textColor || '#ffffff'}"><input type="text" class="form-input bulk-text-color-input" data-index="${index}" value="${link.textColor || '#ffffff'}" style="width:80px;"></div></td>
+          <td style="text-align:center;"><button class="icon-action-btn danger bulk-delete-btn" data-index="${index}"><span class="icon-trash"></span></button></td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+    renderIcons(tbody);
+    attachBulkListeners();
+  }
+
+  function attachBulkListeners() {
+    document.querySelectorAll('.bulk-active-toggle').forEach(t => t.addEventListener('click', function () { const i = parseInt(this.dataset.index); state.links[i].active = !state.links[i].active; this.classList.toggle('active'); renderAdminPreview(); }));
+    document.querySelectorAll('.bulk-category-select').forEach(s => s.addEventListener('change', function () { state.links[parseInt(this.dataset.index)].categoryId = this.value || null; renderAdminPreview(); }));
+    document.querySelectorAll('.bulk-title-input').forEach(i => i.addEventListener('input', function () { state.links[parseInt(this.dataset.index)].title = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.bulk-url-input').forEach(i => i.addEventListener('input', function () { state.links[parseInt(this.dataset.index)].url = this.value; }));
+    document.querySelectorAll('.bulk-color-picker').forEach(p => p.addEventListener('input', function () { const i = parseInt(this.dataset.index); state.links[i].color = this.value; const inp = document.querySelector('.bulk-color-input[data-index="' + i + '"]'); if (inp) inp.value = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.bulk-color-input').forEach(i => i.addEventListener('input', function () { const idx = parseInt(this.dataset.index); state.links[idx].color = this.value; const p = document.querySelector('.bulk-color-picker[data-index="' + idx + '"]'); if (p) p.value = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.bulk-text-color-picker').forEach(p => p.addEventListener('input', function () { const i = parseInt(this.dataset.index); state.links[i].textColor = this.value; const inp = document.querySelector('.bulk-text-color-input[data-index="' + i + '"]'); if (inp) inp.value = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.bulk-text-color-input').forEach(i => i.addEventListener('input', function () { const idx = parseInt(this.dataset.index); state.links[idx].textColor = this.value; const p = document.querySelector('.bulk-text-color-picker[data-index="' + idx + '"]'); if (p) p.value = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.bulk-move-up').forEach(b => b.addEventListener('click', function () { if (!this.disabled) moveLinkBulk(parseInt(this.dataset.index), 'up'); }));
+    document.querySelectorAll('.bulk-move-down').forEach(b => b.addEventListener('click', function () { if (!this.disabled) moveLinkBulk(parseInt(this.dataset.index), 'down'); }));
+    document.querySelectorAll('.bulk-delete-btn').forEach(b => b.addEventListener('click', function () { deleteLinkBulk(parseInt(this.dataset.index)); }));
+  }
+
+  // ========================================
+  // RENDER: ADMIN - PAUTAN KATEGORI
+  // ========================================
+  function renderCategories() {
+    const container = document.getElementById('categoriesListContainer');
+    if (state.categories.length === 0) {
+      container.innerHTML = '<div class="card"><div class="card-body"><div class="empty-state"><span class="icon-folder"></span><h3>Tiada kategori lagi</h3><p>Buat kategori pertama untuk susun pautan anda</p><button class="btn btn-primary" onclick="addCategory()" style="margin:0 auto;"><span class="icon-plus"></span> Buat Kategori Pertama</button></div></div></div>';
+      renderIcons(container);
+      return;
+    }
+    let html = '';
+    state.categories.forEach((category, index) => {
+      html += `
+        <div class="card editor-row">
+          <div class="editor-row-head">
+            <div class="editor-row-head-left" style="flex:1;">
+              <span class="icon-grip"></span>
+              <input type="text" class="form-input category-name-input" data-index="${index}" value="${escapeHtml(category.name)}" placeholder="Nama Kategori" style="font-weight:700;max-width:260px;">
+            </div>
+            <div class="editor-row-actions">
+              <button class="icon-action-btn category-move-up-btn" data-index="${index}" ${index === 0 ? 'disabled' : ''}><span class="icon-arrow-up"></span></button>
+              <button class="icon-action-btn category-move-down-btn" data-index="${index}" ${index === state.categories.length - 1 ? 'disabled' : ''}><span class="icon-arrow-down"></span></button>
+              <label class="active-toggle-label">Aktif <div class="category-toggle-switch toggle-switch ${category.active ? 'active' : ''}" data-index="${index}"></div></label>
+              <button class="icon-action-btn danger delete-category-btn" data-index="${index}"><span class="icon-trash"></span></button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Warna Menu</label>
+                <div class="color-field">
+                  <input type="color" class="category-color-picker" data-index="${index}" value="${category.color || '#3b82f6'}">
+                  <input type="text" class="form-input category-color-input" data-index="${index}" value="${category.color || '#3b82f6'}">
+                  <div class="color-preview-chip category-preview-box" data-index="${index}" style="background:${category.color || '#3b82f6'};color:${category.textColor || '#ffffff'}">Aa</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Warna Teks</label>
+                <div class="color-field">
+                  <input type="color" class="category-text-color-picker" data-index="${index}" value="${category.textColor || '#ffffff'}">
+                  <input type="text" class="form-input category-text-color-input" data-index="${index}" value="${category.textColor || '#ffffff'}">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    });
+    container.innerHTML = html;
+    renderIcons(container);
+    attachCategoriesListeners();
+  }
+
+  function attachCategoriesListeners() {
+    document.querySelectorAll('.category-name-input').forEach(i => i.addEventListener('input', function () { state.categories[parseInt(this.dataset.index)].name = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.category-toggle-switch').forEach(t => t.addEventListener('click', function () { const i = parseInt(this.dataset.index); state.categories[i].active = !state.categories[i].active; this.classList.toggle('active'); renderAdminPreview(); }));
+    document.querySelectorAll('.category-color-picker').forEach(p => p.addEventListener('input', function () { const i = parseInt(this.dataset.index); state.categories[i].color = this.value; const inp = document.querySelector('.category-color-input[data-index="' + i + '"]'); if (inp) inp.value = this.value; const box = document.querySelector('.category-preview-box[data-index="' + i + '"]'); if (box) box.style.background = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.category-color-input').forEach(i => i.addEventListener('input', function () { const idx = parseInt(this.dataset.index); state.categories[idx].color = this.value; const p = document.querySelector('.category-color-picker[data-index="' + idx + '"]'); if (p) p.value = this.value; const box = document.querySelector('.category-preview-box[data-index="' + idx + '"]'); if (box) box.style.background = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.category-text-color-picker').forEach(p => p.addEventListener('input', function () { const i = parseInt(this.dataset.index); state.categories[i].textColor = this.value; const inp = document.querySelector('.category-text-color-input[data-index="' + i + '"]'); if (inp) inp.value = this.value; const box = document.querySelector('.category-preview-box[data-index="' + i + '"]'); if (box) box.style.color = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.category-text-color-input').forEach(i => i.addEventListener('input', function () { const idx = parseInt(this.dataset.index); state.categories[idx].textColor = this.value; const p = document.querySelector('.category-text-color-picker[data-index="' + idx + '"]'); if (p) p.value = this.value; const box = document.querySelector('.category-preview-box[data-index="' + idx + '"]'); if (box) box.style.color = this.value; renderAdminPreview(); }));
+    document.querySelectorAll('.category-move-up-btn').forEach(b => b.addEventListener('click', function () { if (!this.disabled) moveCategory(parseInt(this.dataset.index), 'up'); }));
+    document.querySelectorAll('.category-move-down-btn').forEach(b => b.addEventListener('click', function () { if (!this.disabled) moveCategory(parseInt(this.dataset.index), 'down'); }));
+    document.querySelectorAll('.delete-category-btn').forEach(b => b.addEventListener('click', function () { deleteCategory(parseInt(this.dataset.index)); }));
+  }
+
+  // ========================================
+  // ACTION FUNCTIONS
+  // ========================================
+  function addLink() {
+    if (state.links.length >= 999) { showToast('Had maksimum 999 pautan dicapai!', 'error'); return; }
+    state.links.push({ id: 'link_' + Date.now(), title: 'Pautan Baharu', url: 'https://', active: true, color: '#3b82f6', textColor: '#ffffff', categoryId: null, note: '' });
+    renderLinksEditor(); renderAdminPreview();
+  }
+  function deleteLink(index) {
+    if (confirm('Adakah anda pasti mahu memadam pautan ini?')) { state.links.splice(index, 1); renderLinksEditor(); renderAdminPreview(); }
+  }
+  function moveLink(index, direction) {
+    if (direction === 'up' && index > 0) [state.links[index - 1], state.links[index]] = [state.links[index], state.links[index - 1]];
+    else if (direction === 'down' && index < state.links.length - 1) [state.links[index], state.links[index + 1]] = [state.links[index + 1], state.links[index]];
+    renderLinksEditor(); renderAdminPreview();
+  }
+  function addBulkRow() {
+    if (state.links.length >= 999) { showToast('Had maksimum 999 pautan dicapai!', 'error'); return; }
+    state.links.push({ id: 'link_' + Date.now(), title: 'Pautan Baharu', url: 'https://', active: true, color: '#3b82f6', textColor: '#ffffff', categoryId: null, note: '' });
+    renderBulkLinks(); renderAdminPreview();
+  }
+  function moveLinkBulk(index, direction) {
+    if (direction === 'up' && index > 0) [state.links[index - 1], state.links[index]] = [state.links[index], state.links[index - 1]];
+    else if (direction === 'down' && index < state.links.length - 1) [state.links[index], state.links[index + 1]] = [state.links[index + 1], state.links[index]];
+    renderBulkLinks(); renderAdminPreview();
+  }
+  function deleteLinkBulk(index) {
+    if (confirm('Adakah anda pasti mahu memadam pautan ini?')) { state.links.splice(index, 1); renderBulkLinks(); renderAdminPreview(); }
+  }
+  function saveBulkLinks() { saveLinks(); }
+  function addCategory() {
+    if (state.categories.length >= 999) { showToast('Had maksimum 999 kategori dicapai!', 'error'); return; }
+    state.categories.push({ id: 'category_' + Date.now(), name: 'Kategori Baharu', active: true, color: '#3b82f6', textColor: '#ffffff' });
+    renderCategories(); renderAdminPreview();
+  }
+  function deleteCategory(index) {
+    if (confirm('Adakah anda pasti mahu memadam kategori ini? Pautan dalam kategori ini akan menjadi tanpa kategori.')) {
+      const categoryId = state.categories[index].id;
+      state.links.forEach(link => { if (link.categoryId === categoryId) link.categoryId = null; });
+      state.categories.splice(index, 1);
+      renderCategories(); renderAdminPreview();
+    }
+  }
+  function moveCategory(index, direction) {
+    if (direction === 'up' && index > 0) [state.categories[index - 1], state.categories[index]] = [state.categories[index], state.categories[index - 1]];
+    else if (direction === 'down' && index < state.categories.length - 1) [state.categories[index], state.categories[index + 1]] = [state.categories[index + 1], state.categories[index]];
+    renderCategories(); renderAdminPreview();
+  }
+
+  function switchTab(tabName) {
+    state.currentTab = tabName;
+    document.querySelectorAll('#adminDashboard .tab-view').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('#adminSidebar .nav-item').forEach(n => n.classList.remove('active'));
+    showElement(tabName + 'Tab');
+    document.getElementById(tabName + 'Tab').classList.add('active');
+    const navBtn = document.querySelector('#adminSidebar .nav-item[data-tab="' + tabName + '"]');
+    if (navBtn) navBtn.classList.add('active');
+
+    const titles = { main: 'Papan Pemuka', links: 'Pengurusan Pautan', categories: 'Pautan Kategori', bulk: 'Edit Link Pukal', appearance: 'Ubah Rupa' };
+    document.getElementById('adminTopbarTitle').textContent = titles[tabName] || 'Panel Admin';
+
+    if (tabName === 'links') renderLinksEditor();
+    else if (tabName === 'appearance') renderAppearance();
+    else if (tabName === 'bulk') renderBulkLinks();
+    else if (tabName === 'categories') renderCategories();
+    else if (tabName === 'main') renderDashboardStats();
+
+    closeAdminSidebar();
+  }
+
+  // ========================================
+  // INITIALIZATION
+  // ========================================
+  document.addEventListener('DOMContentLoaded', function () {
+    renderIcons(document);
+
+    document.getElementById('pubLoginBtn').addEventListener('click', function () { showElement('loginModal'); });
+
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const password = document.getElementById('passwordInput').value;
+      const isValid = await verifyPasswordRemote(password);
+      if (isValid) {
+        state.isAuthenticated = true;
+        sessionStorage.setItem('linkbuilder_auth', 'true');
+        hideElement('loginModal');
+        hideElement('publicView');
+        showElement('adminDashboard');
+        renderDashboardStats();
+        renderAdminPreview();
+        document.getElementById('passwordInput').value = '';
+        hideElement('loginError');
+        loadAllData();
+        setupPreviewFrame();
+      } else {
+        showElement('loginError');
+      }
+    });
+
+    document.getElementById('cancelLoginBtn').addEventListener('click', function () {
+      hideElement('loginModal');
+      document.getElementById('passwordInput').value = '';
+      hideElement('loginError');
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', function () {
+      state.isAuthenticated = false;
+      sessionStorage.removeItem('linkbuilder_auth');
+      hideElement('adminDashboard');
+      renderPublicView();
+      showElement('publicView');
+    });
+
+    document.getElementById('viewLiveBtn').addEventListener('click', function () {
+      hideElement('adminDashboard');
+      renderPublicView();
+      showElement('publicView');
+    });
+
+    document.getElementById('refreshPreviewBtn').addEventListener('click', setupPreviewFrame);
+
+    // PDF Viewer
+    document.getElementById('pdfModalClose').addEventListener('click', closePdfViewer);
+    document.getElementById('pdfModal').addEventListener('click', function(e) {
+      if (e.target === this) closePdfViewer(); // klik overlay gelap untuk tutup
+    });
+
+    // Image Viewer
+    document.getElementById('imgModalClose').addEventListener('click', closeImageViewer);
+    document.getElementById('imgModal').addEventListener('click', function(e) {
+      if (e.target === this) closeImageViewer(); // klik overlay gelap untuk tutup
+    });
+
+    // Nota Viewer (Awam)
+    document.getElementById('noteModalClose').addEventListener('click', closeNoteViewer);
+    document.getElementById('noteModal').addEventListener('click', function(e) {
+      if (e.target === this) closeNoteViewer(); // klik overlay gelap untuk tutup
+    });
+
+    // Nota Editor - WYSIWYG (Admin)
+    setupNoteEditorToolbar();
+    document.getElementById('noteEditorClose').addEventListener('click', closeNoteEditor);
+    document.getElementById('noteEditorCancel').addEventListener('click', closeNoteEditor);
+    document.getElementById('noteEditorSave').addEventListener('click', saveNoteEditor);
+    document.getElementById('noteEditorModal').addEventListener('click', function(e) {
+      if (e.target === this) closeNoteEditor(); // klik overlay gelap untuk tutup
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { closePdfViewer(); closeImageViewer(); closeNoteViewer(); closeNoteEditor(); }
+    });
+
+    document.getElementById('addLinkBtn').addEventListener('click', addLink);
+    document.getElementById('saveLinksBtn').addEventListener('click', saveLinks);
+    document.getElementById('addCategoryBtn').addEventListener('click', addCategory);
+    document.getElementById('saveCategoriesBtn').addEventListener('click', saveCategories);
+    document.getElementById('addBulkRowBtn').addEventListener('click', addBulkRow);
+    document.getElementById('saveBulkBtn').addEventListener('click', saveBulkLinks);
+
+    document.querySelectorAll('#adminSidebar .nav-item[data-tab]').forEach(nav => {
+      nav.addEventListener('click', function () { switchTab(this.dataset.tab); });
+    });
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+      btn.addEventListener('click', function () { switchTab(this.dataset.tab); });
+    });
+
+    document.getElementById('avatarUrlInput').addEventListener('input', function () {
+      state.profile.avatarUrl = this.value || 'https://i.postimg.cc/qBcGF2Ww/Logo-SK-Adin.png';
+      renderAppearance(); renderAdminPreview();
+    });
+    document.getElementById('avatarUrlInput').addEventListener('blur', saveProfile);
+
+    document.querySelectorAll('.avatar-shape-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        state.profile.avatarShape = this.dataset.shape;
+        renderAppearance(); renderAdminPreview(); saveProfile();
+      });
+    });
+
+    document.getElementById('pageTitleInput').addEventListener('input', function () { state.profile.pageTitle = this.value; renderAdminPreview(); });
+    document.getElementById('pageTitleInput').addEventListener('blur', saveProfile);
+    document.getElementById('descriptionInput').addEventListener('input', function () { state.profile.description = this.value; renderAdminPreview(); });
+    document.getElementById('descriptionInput').addEventListener('blur', saveProfile);
+
+    // Banner
+    document.getElementById('bannerActiveToggle').addEventListener('click', function () {
+      state.profile.bannerActive = !state.profile.bannerActive;
+      this.classList.toggle('active', state.profile.bannerActive);
+      renderAdminPreview();
+      saveProfile();
+    });
+    document.getElementById('bannerUrlInput').addEventListener('input', function () {
+      state.profile.bannerUrl = this.value.trim();
+      updateBannerPreview();
+      renderAdminPreview();
+    });
+    document.getElementById('bannerUrlInput').addEventListener('blur', saveProfile);
+
+    hideElement('initialLoading');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPreviewFrame = urlParams.get('preview') === '1';
+
+    if (isPreviewFrame) {
+      // Mod pratonton (dimuatkan dalam iframe admin) - sentiasa papar Public View
+      document.documentElement.classList.add('is-preview-frame');
+      showElement('publicView');
+      renderPublicView(); // paparan awal (kosong/default) sementara tunggu draf dari tetingkap induk
+
+      // Dengar draf state terkini dari tetingkap induk (supaya perubahan belum simpan pun terus nampak)
+      window.addEventListener('message', function (e) {
+        if (!e.data || e.data.type !== 'LB_PREVIEW_STATE') return;
+        state.profile = e.data.profile || state.profile;
+        state.links = e.data.links || [];
+        state.categories = e.data.categories || [];
+        renderPublicView();
+      });
+
+      // Fallback: jika dibuka berasingan (bukan dalam iframe admin) & tiada mesej diterima,
+      // muat data sebenar dari Google Sheets supaya pratonton tetap berguna sendirian.
+      setTimeout(function () {
+        if (state.links.length === 0 && state.categories.length === 0) loadAllData();
+      }, 1200);
+    } else {
+      const sessionAuth = sessionStorage.getItem('linkbuilder_auth');
+      if (sessionAuth === 'true') {
+        state.isAuthenticated = true;
+        showElement('adminDashboard');
+        loadAllData();
+        setupPreviewFrame();
+      } else {
+        loadAllData();
+        showElement('publicView');
+      }
+
+      // Bila iframe pratonton selesai dimuat, terus hantar draf state semasa (termasuk yang belum disimpan)
+      const previewFrameEl = document.getElementById('previewFrame');
+      if (previewFrameEl) {
+        previewFrameEl.addEventListener('load', function () {
+          previewFrameReady = true;
+          pushPreviewState();
+        });
+      }
+    }
+  });
+</script>
+</body>
+</html>

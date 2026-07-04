@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laman Info Pengelola Pertandingan</title>
+<link rel="icon" type="image/png" href="https://i.postimg.cc/qBcGF2Ww/Logo-SK-Adin.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sidebar-w:256px;
+  --blue-700:#1d4ed8; --blue-600:#2563eb; --blue-100:#dbeafe; --blue-50:#eff6ff;
+  --emerald-700:#047857; --emerald-600:#059669; --emerald-50:#ecfdf5;
+  --slate-900:#0f172a; --slate-800:#1e293b; --slate-700:#334155;
+  --slate-600:#475569; --slate-500:#64748b; --slate-400:#94a3b8;
+  --slate-300:#cbd5e1; --slate-200:#e2e8f0; --slate-100:#f1f5f9;
+  --slate-50:#f8fafc; --white:#ffffff;
+  --radius:8px; --radius-lg:12px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow:0 4px 12px rgba(0,0,0,.08);
+  --transition:150ms cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+html{font-size:14px;}
+body{font-family:'DM Sans',sans-serif;background:var(--slate-50);color:var(--slate-900);overflow:hidden;}
+h1,h2,h3{font-family:'DM Serif Display',serif;}
+a{text-decoration:none;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--slate-300);border-radius:99px;}
+
+.app-shell{height:100vh;display:flex;overflow:hidden;}
+.sidebar{
+  width:var(--sidebar-w); min-height:100vh; background:var(--slate-900);
+  display:flex; flex-direction:column; flex-shrink:0;
+  position:fixed; left:0; top:0; bottom:0; z-index:50; overflow-y:auto;
+  transition:transform 250ms cubic-bezier(.4,0,.2,1);
+}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;backdrop-filter:blur(2px);}
+.hamburger-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;color:var(--slate-600);transition:background var(--transition);}
+.hamburger-btn:hover{background:var(--slate-100);}
+.hamburger-btn svg{width:20px;height:20px;display:block;}
+.sb-header{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;}
+.sb-logo{width:40px;height:40px;border-radius:8px;object-fit:contain;background:rgba(255,255,255,.08);flex-shrink:0;}
+.sb-title{font-family:'DM Serif Display',serif;font-size:13px;color:#fff;line-height:1.25;}
+.sb-school{font-size:11px;color:var(--slate-400);margin-top:2px;}
+.sb-nav{padding:12px 8px;flex:1;}
+.sb-section-label{font-size:10px;font-weight:700;color:var(--slate-600);letter-spacing:.08em;text-transform:uppercase;padding:10px 8px 4px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;cursor:pointer;
+  font-size:13px;color:var(--slate-400);transition:background var(--transition),color var(--transition);
+  margin-bottom:1px;text-decoration:none;border:none;background:none;width:100%;text-align:left;
+  font-family:'DM Sans',sans-serif;
+}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.nav-item.active{background:var(--blue-600);color:#fff;}
+.nav-item .nav-item-label{flex:1;}
+.icon{width:17px;height:17px;flex-shrink:0;}
+.icon-lg{width:19px;height:19px;}
+.icon-inline{width:12px;height:12px;vertical-align:-1px;margin-right:2px;}
+.sb-footer{padding:12px 8px;border-top:1px solid rgba(255,255,255,.06);}
+.sb-meta{font-size:11px;color:var(--slate-600);padding:8px 8px 2px;}
+
+.main-area{margin-left:var(--sidebar-w);flex:1;height:100vh;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{
+  background:var(--white);border-bottom:1px solid var(--slate-200);padding:0 24px;height:56px;
+  display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:30;
+}
+.topbar-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--slate-900);flex:1;}
+.content-area{flex:1;overflow-y:auto;padding:24px;}
+
+@media (max-width:1023px){
+  .sidebar{transform:translateX(calc(-1 * var(--sidebar-w)));box-shadow:none;}
+  .sidebar.open{transform:translateX(0);box-shadow:var(--shadow);}
+  .sidebar-overlay.show{display:block;}
+  .main-area{margin-left:0;height:100vh;}
+  .hamburger-btn{display:flex;align-items:center;justify-content:center;}
+}
+@media (max-width:640px){
+  .content-area{padding:16px;}
+}
+
+/* ═══ Halaman Utama - Papan Data Pertandingan ═══ */
+.hu-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.hu-search{flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--slate-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--white);}
+.hu-count-badge{font-size:11px;font-weight:700;background:var(--blue-50);color:var(--blue-700);padding:4px 10px;border-radius:99px;}
+/* ═══ Tab (Tarian / Nyanyian BM / Nyanyian BI) ═══ */
+.hu-tabs{display:flex;gap:4px;border-bottom:1px solid var(--slate-200);margin-bottom:20px;overflow-x:auto;}
+.hu-tab{
+  display:flex;align-items:center;gap:7px;padding:10px 16px;border:none;background:none;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--slate-500);
+  border-bottom:2px solid transparent;white-space:nowrap;transition:color var(--transition),border-color var(--transition);
+}
+.hu-tab:hover{color:var(--slate-800);}
+.hu-tab.active{color:var(--blue-700);border-bottom-color:var(--blue-600);}
+.hu-tab .icon{width:15px;height:15px;}
+.hu-tab-count{font-size:10.5px;font-weight:700;background:var(--slate-100);color:var(--slate-600);padding:2px 7px;border-radius:99px;}
+.hu-tab.active .hu-tab-count{background:var(--blue-50);color:var(--blue-700);}
+.hu-tab-panel{margin-bottom:0;}
+.hu-section{margin-bottom:32px;}
+.hu-title{font-size:18px;color:var(--slate-900);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.hu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.hu-table-wrap{background:var(--white);border:1px solid var(--slate-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow-x:auto;}
+.hu-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:12.5px;min-width:640px;}
+.hu-table thead th{
+  background:var(--slate-100);color:var(--slate-600);font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.04em;text-align:left;padding:10px 14px;
+  border-bottom:1px solid var(--slate-200);white-space:nowrap;
+}
+.hu-table tbody td{padding:12px 14px;border-bottom:1px solid var(--slate-100);vertical-align:top;color:var(--slate-700);word-wrap:break-word;overflow-wrap:break-word;word-break:break-word;}
+.hu-table tbody tr:last-child td{border-bottom:none;}
+.hu-table tbody tr:hover{background:var(--slate-50);}
+.hu-table td.hu-td-bil{width:36px;text-align:center;color:var(--slate-400);font-weight:600;}
+.hu-table td.hu-td-school{font-family:'DM Serif Display',serif;font-size:14px;color:var(--slate-900);}
+.hu-table td.hu-td-lagu{color:var(--blue-700);}
+.hu-table td.hu-td-tarian{color:var(--emerald-700);}
+.hu-col-bil{width:6%;}
+.hu-col-school{width:18%;}
+.hu-col-title{width:20%;}
+.hu-col-peserta{width:36%;}
+.hu-col-guru{width:20%;}
+.hu-namelist-ol{margin:0;padding-left:16px;word-wrap:break-word;overflow-wrap:break-word;}
+.hu-namelist-ol li{margin-bottom:3px;word-wrap:break-word;overflow-wrap:break-word;}
+.hu-namelist-ol li:last-child{margin-bottom:0;}
+.hu-card{background:var(--white);border:1px solid var(--slate-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:16px;transition:box-shadow var(--transition);}
+.hu-card:hover{box-shadow:var(--shadow);}
+.hu-school{font-family:'DM Serif Display',serif;font-size:15px;color:var(--slate-900);margin-bottom:6px;}
+.hu-lagu{font-size:12px;color:var(--blue-700);background:var(--blue-50);display:inline-block;padding:3px 9px;border-radius:6px;margin-bottom:10px;line-height:1.5;}
+.hu-tarian-name{font-size:12px;color:var(--emerald-700);background:var(--emerald-50);display:inline-block;padding:3px 9px;border-radius:6px;margin-bottom:10px;}
+.hu-listlabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--slate-500);margin-top:10px;}
+.hu-namelist{font-size:12.5px;color:var(--slate-700);line-height:1.7;margin-top:2px;}
+.hu-empty{font-size:12.5px;color:var(--slate-400);padding:20px;text-align:center;border:1px dashed var(--slate-200);border-radius:var(--radius);grid-column:1/-1;}
+.hu-loading{display:flex;align-items:center;gap:8px;color:var(--slate-500);font-size:13px;padding:16px 0;grid-column:1/-1;}
+.spinner{width:14px;height:14px;border:2px solid var(--slate-300);border-top-color:var(--blue-600);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+/* ─────────────────── BANNER (sepadan tepat dengan Pautan.html) ─────────────────── */
+.content-banner {
+  width: 100%;
+  margin-bottom: 18px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  background: var(--slate-100);
+  position: relative;
+  /* Tiada aspect-ratio tetap — imej papar ketinggian semula jadi, tiada crop */
+}
+.content-banner-img {
+  width: 100%;
+  height: auto;         /* ketinggian ikut nisbah sebenar imej */
+  display: block;
+  transition: opacity .3s ease;
+}
+@media (min-width: 1024px) {
+  .content-banner { margin-bottom: 20px; }
+  .content-banner-img { max-height: 400px; object-fit: contain; object-position: center; }
+}
+.content-banner-placeholder{
+  width:100%;padding:40px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:8px;color:var(--slate-400);background:var(--slate-100);border:2px dashed var(--slate-300);border-radius:var(--radius-lg);
+}
+.content-banner-placeholder svg{opacity:.4;}
+.content-banner-placeholder p{font-size:12px;}
+.loading-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);display:flex;align-items:center;justify-content:center;z-index:200;}
+.loading-box{background:var(--white);padding:18px 24px;border-radius:var(--radius-lg);display:flex;gap:14px;align-items:center;box-shadow:0 12px 32px rgba(0,0,0,.2);font-weight:600;font-size:13px;color:var(--slate-700);}
+.loading-overlay .spinner{width:26px;height:26px;border:3px solid var(--slate-200);border-top-color:var(--blue-600);border-radius:50%;animation:spin .7s linear infinite;}
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar" id="pubSidebar">
+    <div class="sb-header">
+      <img class="sb-logo" src="https://i.postimg.cc/qBcGF2Ww/Logo-SK-Adin.png" alt="Logo">
+      <div>
+        <div class="sb-title">Karnival Seni &amp; Sukan</div>
+        <div class="sb-school">Asrama Sekolah Harian 2026</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-section-label">Menu</div>
+      <a class="nav-item active" href="https://skadinsarikei.github.io/pengelola/index.html" target="_top">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg>
+        <span class="nav-item-label">Halaman Utama</span>
+      </a>
+      <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/borangtarian.html" target="_top">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="1.6"/><path d="M12 6.5v5.5"/><path d="M12 12 7 9"/><path d="M12 12l6-2"/><path d="M12 12l-4 8"/><path d="M12 12l5 7"/></svg>
+        <span class="nav-item-label">Borang Tarian</span>
+      </a>
+      <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/borangnyanyian.html" target="_top">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v4"/><path d="M9 22h6"/></svg>
+        <span class="nav-item-label">Borang Nyanyian</span>
+      </a>
+
+      <div id="kategoriNavWrap" class="hidden">
+        <div class="sb-section-label">Kategori</div>
+        <div id="kategoriNav"></div>
+      </div>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-meta">PPD Sarikei · Peringkat Daerah</div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="pubOverlay" onclick="closePubSidebar()"></div>
+
+  <div class="main-area">
+    <div class="topbar">
+      <button class="hamburger-btn" id="pubHamburgerBtn" onclick="openPubSidebar()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      </button>
+      <span class="topbar-title">Halaman Utama — Penyertaan Pertandingan</span>
+    </div>
+
+    <div class="content-area">
+      <div id="huBanner" class="content-banner hidden"></div>
+
+      <div class="hu-toolbar">
+        <input type="text" class="hu-search" id="huSearchInput" placeholder="Cari nama sekolah...">
+        <span class="hu-count-badge" id="huCountBadge">Memuatkan...</span>
+      </div>
+
+      <div class="hu-tabs" role="tablist">
+        <button class="hu-tab active" id="tabBtnTarian" role="tab" aria-selected="true" onclick="switchHuTab('tarian')">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="1.6"/><path d="M12 6.5v5.5"/><path d="M12 12 7 9"/><path d="M12 12l6-2"/><path d="M12 12l-4 8"/><path d="M12 12l5 7"/></svg>
+          <span>Tarian</span>
+          <span class="hu-tab-count" id="tabCountTarian"></span>
+        </button>
+        <button class="hu-tab" id="tabBtnNyanyianBM" role="tab" aria-selected="false" onclick="switchHuTab('nyanyianBM')">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v4"/><path d="M9 22h6"/></svg>
+          <span>Nyanyian — BM</span>
+          <span class="hu-tab-count" id="tabCountNyanyianBM"></span>
+        </button>
+        <button class="hu-tab" id="tabBtnNyanyianBI" role="tab" aria-selected="false" onclick="switchHuTab('nyanyianBI')">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          <span>Nyanyian — BI</span>
+          <span class="hu-tab-count" id="tabCountNyanyianBI"></span>
+        </button>
+      </div>
+
+      <div class="hu-section hu-tab-panel" id="panelTarian">
+        <h2 class="hu-title"><svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="1.6"/><path d="M12 6.5v5.5"/><path d="M12 12 7 9"/><path d="M12 12l6-2"/><path d="M12 12l-4 8"/><path d="M12 12l5 7"/></svg> Tarian</h2>
+        <div class="hu-table-wrap" id="gridTarian"><div class="hu-loading"><div class="spinner"></div> Memuatkan data tarian...</div></div>
+      </div>
+
+      <div class="hu-section hu-tab-panel hidden" id="panelNyanyianBM">
+        <h2 class="hu-title"><svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v4"/><path d="M9 22h6"/></svg> Nyanyian — Bahasa Melayu</h2>
+        <div class="hu-table-wrap" id="gridNyanyianBM"><div class="hu-loading"><div class="spinner"></div> Memuatkan...</div></div>
+      </div>
+
+      <div class="hu-section hu-tab-panel hidden" id="panelNyanyianBI">
+        <h2 class="hu-title"><svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Nyanyian — Bahasa Inggeris</h2>
+        <div class="hu-table-wrap" id="gridNyanyianBI"><div class="hu-loading"><div class="spinner"></div> Memuatkan...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="loading-box">
+    <div class="spinner" style="width:22px;height:22px;"></div>
+    <p id="loadingMessage">Memuatkan...</p>
+  </div>
+</div>
+
+<script>
+// ═══ TETAPKAN URL WEB APP GABUNGAN INI SELEPAS DEPLOY ═══
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzv7U_zPXhJR6PENaWBW87m2Arit55upqO3C5xIpgA5VO-JI5G3kmt2YVn_ENnRhNhd/exec";
+
+let huCache = null;
+
+function openPubSidebar(){ document.getElementById('pubSidebar').classList.add('open'); document.getElementById('pubOverlay').classList.add('show'); }
+function closePubSidebar(){ document.getElementById('pubSidebar').classList.remove('open'); document.getElementById('pubOverlay').classList.remove('show'); }
+
+const ICON_USERS = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const ICON_TEACHER = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6"/><path d="M2 10l10-5 10 5-10 5-10-5Z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>';
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str).replace(/[&<>"']/g, function (c) {
+    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+  });
+}
+
+async function loadHalamanUtama() {
+  try {
+    const [resT, resN] = await Promise.all([
+      fetch(GAS_WEB_APP_URL + "?action=listTarian").then(r => r.json()),
+      fetch(GAS_WEB_APP_URL + "?action=listNyanyian").then(r => r.json())
+    ]);
+    const tarian = (resT.success ? resT.data : []) || [];
+    const nyanyian = (resN.success ? resN.data : []) || [];
+    huCache = {
+      tarian: tarian,
+      nyanyianBM: nyanyian.filter(d => d.kategoriBahasa === "Bahasa Melayu"),
+      nyanyianBI: nyanyian.filter(d => d.kategoriBahasa === "Bahasa Inggeris")
+    };
+    renderHalamanUtama();
+  } catch (err) {
+    console.error("Gagal muat data pertandingan:", err);
+    ["gridTarian", "gridNyanyianBM", "gridNyanyianBI"].forEach(id => {
+      document.getElementById(id).innerHTML = '<div class="hu-empty">Gagal memuatkan data. Sila semak GAS_WEB_APP_URL / sambungan internet.</div>';
+    });
+    document.getElementById("huCountBadge").textContent = "Ralat memuat data";
+  }
+}
+
+function renderHalamanUtama() {
+  if (!huCache) return;
+  const q = (document.getElementById("huSearchInput").value || "").toLowerCase().trim();
+  const filt = list => q ? list.filter(d => (d.sekolah || "").toLowerCase().includes(q)) : list;
+
+  const t = filt(huCache.tarian);
+  const bm = filt(huCache.nyanyianBM);
+  const bi = filt(huCache.nyanyianBI);
+
+  renderGridTarian("gridTarian", t);
+  renderGridNyanyian("gridNyanyianBM", bm);
+  renderGridNyanyian("gridNyanyianBI", bi);
+
+  document.getElementById("huCountBadge").textContent = (t.length + bm.length + bi.length) + " penyertaan";
+  document.getElementById("tabCountTarian").textContent = t.length;
+  document.getElementById("tabCountNyanyianBM").textContent = bm.length;
+  document.getElementById("tabCountNyanyianBI").textContent = bi.length;
+}
+
+const HU_TABS = {
+  tarian:      { btn: "tabBtnTarian",      panel: "panelTarian" },
+  nyanyianBM:  { btn: "tabBtnNyanyianBM",  panel: "panelNyanyianBM" },
+  nyanyianBI:  { btn: "tabBtnNyanyianBI",  panel: "panelNyanyianBI" }
+};
+
+function switchHuTab(key) {
+  Object.keys(HU_TABS).forEach(k => {
+    const { btn, panel } = HU_TABS[k];
+    const isActive = k === key;
+    document.getElementById(btn).classList.toggle("active", isActive);
+    document.getElementById(btn).setAttribute("aria-selected", isActive ? "true" : "false");
+    document.getElementById(panel).classList.toggle("hidden", !isActive);
+  });
+}
+
+function renderPesertaList(peserta) {
+  const list = peserta || [];
+  if (!list.length) return "—";
+  return `<ol class="hu-namelist-ol">${list.map(p => `<li>${escapeHtml(p.nama)}</li>`).join("")}</ol>`;
+}
+
+function renderGridTarian(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!items.length) { el.innerHTML = '<div class="hu-empty">Tiada penyertaan tarian.</div>'; return; }
+  const rows = items.map((item, i) => `
+    <tr>
+      <td class="hu-td-bil">${i + 1}</td>
+      <td class="hu-td-school">${escapeHtml(item.sekolah)}</td>
+      <td class="hu-td-tarian">${escapeHtml(item.tarian) || "—"}</td>
+      <td>${renderPesertaList(item.peserta)}</td>
+      <td class="hu-td-guru">${escapeHtml(item.guru) || "—"}</td>
+    </tr>`).join("");
+  el.innerHTML = `<table class="hu-table">
+    <colgroup><col class="hu-col-bil"><col class="hu-col-school"><col class="hu-col-title"><col class="hu-col-peserta"><col class="hu-col-guru"></colgroup>
+    <thead><tr><th>Bil</th><th>Nama Sekolah</th><th>Nama Tarian</th><th>Senarai Peserta</th><th>Guru Pengiring</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function renderGridNyanyian(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!items.length) { el.innerHTML = '<div class="hu-empty">Tiada penyertaan.</div>'; return; }
+  const rows = items.map((item, i) => `
+    <tr>
+      <td class="hu-td-bil">${i + 1}</td>
+      <td class="hu-td-school">${escapeHtml(item.sekolah)}</td>
+      <td class="hu-td-lagu">${escapeHtml(item.tajukLagu) || "—"}</td>
+      <td>${renderPesertaList(item.peserta)}</td>
+      <td class="hu-td-guru">${escapeHtml(item.guru) || "—"}</td>
+    </tr>`).join("");
+  el.innerHTML = `<table class="hu-table">
+    <colgroup><col class="hu-col-bil"><col class="hu-col-school"><col class="hu-col-title"><col class="hu-col-peserta"><col class="hu-col-guru"></colgroup>
+    <thead><tr><th>Bil</th><th>Nama Sekolah</th><th>Tajuk Lagu</th><th>Senarai Peserta</th><th>Guru Pengiring</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+document.getElementById("huSearchInput").addEventListener("input", renderHalamanUtama);
+loadHalamanUtama();
+
+// ═══ Bantuan Overlay Pemuatan (sepadan Pautan.html) ═══
+function showElement(id) { const el = document.getElementById(id); if (el) el.classList.remove("hidden"); }
+function hideElement(id) { const el = document.getElementById(id); if (el) el.classList.add("hidden"); }
+function showLoading(message) {
+  document.getElementById("loadingMessage").textContent = message;
+  showElement("loadingOverlay");
+}
+function hideLoading() { hideElement("loadingOverlay"); }
+
+// ═══ BANNER & KATEGORI (dari Halaman Pautan - Profile/Categories sheet) ═══
+async function loadBannerDanKategori() {
+  showLoading("Memuatkan banner...");
+  try {
+    const res = await fetch(GAS_WEB_APP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ action: "getAllData", data: "{}" })
+    });
+    const result = await res.json();
+    hideLoading();
+    if (!result.success) return;
+
+    // Banner - guna kaedah sama seperti Pautan.html: cipta <img> secara
+    // dinamik + onerror fallback, supaya lancar & tiada ikon "gambar pecah".
+    const profile = result.data.profile;
+    const banner = document.getElementById("huBanner");
+    if (profile && profile.bannerActive && profile.bannerUrl) {
+      banner.innerHTML = "";
+      const img = document.createElement("img");
+      img.className = "content-banner-img";
+      img.alt = "Banner";
+      img.src = profile.bannerUrl;
+      img.onerror = function () {
+        banner.innerHTML = '<div class="content-banner-placeholder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Gambar tidak dapat dimuatkan</p></div>';
+      };
+      banner.appendChild(img);
+      banner.classList.remove("hidden");
+    } else {
+      banner.classList.add("hidden");
+    }
+
+    const categories = (result.data.categories || []).filter(c => c.active).sort((a, b) => a.order - b.order);
+    const wrap = document.getElementById("kategoriNavWrap");
+    const nav = document.getElementById("kategoriNav");
+    if (categories.length) {
+      nav.innerHTML = categories.map(cat => `
+        <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/pautan.html?cat=${encodeURIComponent(cat.id)}" target="_top">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v4H4z"/><path d="M4 12h16v8H4z"/></svg>
+          <span class="nav-item-label">${escapeHtml(cat.name)}</span>
+        </a>`).join("");
+      wrap.classList.remove("hidden");
+    }
+  } catch (err) {
+    hideLoading();
+    console.error("Gagal muat banner/kategori:", err);
+  }
+}
+loadBannerDanKategori();
+</script>
+</body>
+</html>
