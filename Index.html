@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laman Info Pengelola Pertandingan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sidebar-w:256px;
+  --blue-700:#1d4ed8; --blue-600:#2563eb; --blue-100:#dbeafe; --blue-50:#eff6ff;
+  --emerald-700:#047857; --emerald-600:#059669; --emerald-50:#ecfdf5;
+  --slate-900:#0f172a; --slate-800:#1e293b; --slate-700:#334155;
+  --slate-600:#475569; --slate-500:#64748b; --slate-400:#94a3b8;
+  --slate-300:#cbd5e1; --slate-200:#e2e8f0; --slate-100:#f1f5f9;
+  --slate-50:#f8fafc; --white:#ffffff;
+  --radius:8px; --radius-lg:12px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow:0 4px 12px rgba(0,0,0,.08);
+  --transition:150ms cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+html{font-size:14px;}
+body{font-family:'DM Sans',sans-serif;background:var(--slate-50);color:var(--slate-900);overflow:hidden;}
+h1,h2,h3{font-family:'DM Serif Display',serif;}
+a{text-decoration:none;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--slate-300);border-radius:99px;}
+
+.app-shell{height:100vh;display:flex;overflow:hidden;}
+.sidebar{
+  width:var(--sidebar-w); min-height:100vh; background:var(--slate-900);
+  display:flex; flex-direction:column; flex-shrink:0;
+  position:fixed; left:0; top:0; bottom:0; z-index:50; overflow-y:auto;
+}
+.sb-header{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px;}
+.sb-logo{width:40px;height:40px;border-radius:8px;object-fit:contain;background:rgba(255,255,255,.08);flex-shrink:0;}
+.sb-title{font-family:'DM Serif Display',serif;font-size:13px;color:#fff;line-height:1.25;}
+.sb-school{font-size:11px;color:var(--slate-400);margin-top:2px;}
+.sb-nav{padding:12px 8px;flex:1;}
+.sb-section-label{font-size:10px;font-weight:700;color:var(--slate-600);letter-spacing:.08em;text-transform:uppercase;padding:10px 8px 4px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;cursor:pointer;
+  font-size:13px;color:var(--slate-400);transition:background var(--transition),color var(--transition);
+  margin-bottom:1px;text-decoration:none;border:none;background:none;width:100%;text-align:left;
+  font-family:'DM Sans',sans-serif;
+}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff;}
+.nav-item.active{background:var(--blue-600);color:#fff;}
+.nav-item .nav-item-label{flex:1;}
+.icon{width:17px;height:17px;flex-shrink:0;}
+.icon-lg{width:19px;height:19px;}
+.icon-inline{width:12px;height:12px;vertical-align:-1px;margin-right:2px;}
+.sb-footer{padding:12px 8px;border-top:1px solid rgba(255,255,255,.06);}
+.sb-meta{font-size:11px;color:var(--slate-600);padding:8px 8px 2px;}
+
+.main-area{margin-left:var(--sidebar-w);flex:1;height:100vh;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.topbar{
+  background:var(--white);border-bottom:1px solid var(--slate-200);padding:0 24px;height:56px;
+  display:flex;align-items:center;gap:12px;flex-shrink:0;position:sticky;top:0;z-index:30;
+}
+.topbar-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--slate-900);flex:1;}
+.content-area{flex:1;overflow-y:auto;padding:24px;}
+
+/* ═══ Halaman Utama - Papan Data Pertandingan ═══ */
+.hu-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.hu-search{flex:1;min-width:200px;padding:9px 12px;border:1px solid var(--slate-200);border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:13px;background:var(--white);}
+.hu-count-badge{font-size:11px;font-weight:700;background:var(--blue-50);color:var(--blue-700);padding:4px 10px;border-radius:99px;}
+.hu-section{margin-bottom:32px;}
+.hu-title{font-size:18px;color:var(--slate-900);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.hu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;}
+.hu-card{background:var(--white);border:1px solid var(--slate-200);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);padding:16px;transition:box-shadow var(--transition);}
+.hu-card:hover{box-shadow:var(--shadow);}
+.hu-school{font-family:'DM Serif Display',serif;font-size:15px;color:var(--slate-900);margin-bottom:6px;}
+.hu-lagu{font-size:12px;color:var(--blue-700);background:var(--blue-50);display:inline-block;padding:3px 9px;border-radius:6px;margin-bottom:10px;line-height:1.5;}
+.hu-tarian-name{font-size:12px;color:var(--emerald-700);background:var(--emerald-50);display:inline-block;padding:3px 9px;border-radius:6px;margin-bottom:10px;}
+.hu-listlabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--slate-500);margin-top:10px;}
+.hu-namelist{font-size:12.5px;color:var(--slate-700);line-height:1.7;margin-top:2px;}
+.hu-empty{font-size:12.5px;color:var(--slate-400);padding:20px;text-align:center;border:1px dashed var(--slate-200);border-radius:var(--radius);grid-column:1/-1;}
+.hu-loading{display:flex;align-items:center;gap:8px;color:var(--slate-500);font-size:13px;padding:16px 0;grid-column:1/-1;}
+.spinner{width:14px;height:14px;border:2px solid var(--slate-300);border-top-color:var(--blue-600);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sb-header">
+      <img class="sb-logo" src="https://i.postimg.cc/qBcGF2Ww/Logo-SK-Adin.png" alt="Logo">
+      <div>
+        <div class="sb-title">Karnival Seni &amp; Sukan</div>
+        <div class="sb-school">Asrama Sekolah Harian 2026</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-section-label">Menu</div>
+      <a class="nav-item active" href="?page=utama">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg>
+        <span class="nav-item-label">Halaman Utama</span>
+      </a>
+
+      <div class="sb-section-label">Kategori</div>
+      <a class="nav-item" href="?page=tarian">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="1.6"/><path d="M12 6.5v5.5"/><path d="M12 12 7 9"/><path d="M12 12l6-2"/><path d="M12 12l-4 8"/><path d="M12 12l5 7"/></svg>
+        <span class="nav-item-label">Borang Tarian</span>
+      </a>
+      <a class="nav-item" href="?page=nyanyian">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v4"/><path d="M9 22h6"/></svg>
+        <span class="nav-item-label">Borang Nyanyian</span>
+      </a>
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-meta">PPD Sarikei · Peringkat Daerah</div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <div class="topbar">
+      <span class="topbar-title">Halaman Utama — Penyertaan Pertandingan</span>
+    </div>
+
+    <div class="content-area">
+      <div class="hu-toolbar">
+        <input type="text" class="hu-search" id="huSearchInput" placeholder="Cari nama sekolah...">
+        <span class="hu-count-badge" id="huCountBadge">Memuatkan...</span>
+      </div>
+
+      <div class="hu-section">
+        <h2 class="hu-title"><svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="1.6"/><path d="M12 6.5v5.5"/><path d="M12 12 7 9"/><path d="M12 12l6-2"/><path d="M12 12l-4 8"/><path d="M12 12l5 7"/></svg> Tarian</h2>
+        <div class="hu-grid" id="gridTarian"><div class="hu-loading"><div class="spinner"></div> Memuatkan data tarian...</div></div>
+      </div>
+
+      <div class="hu-section">
+        <h2 class="hu-title"><svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v4"/><path d="M9 22h6"/></svg> Nyanyian — Bahasa Melayu</h2>
+        <div class="hu-grid" id="gridNyanyianBM"><div class="hu-loading"><div class="spinner"></div> Memuatkan...</div></div>
+      </div>
+
+      <div class="hu-section">
+        <h2 class="hu-title"><svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Nyanyian — Bahasa Inggeris</h2>
+        <div class="hu-grid" id="gridNyanyianBI"><div class="hu-loading"><div class="spinner"></div> Memuatkan...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ TETAPKAN URL WEB APP GABUNGAN INI SELEPAS DEPLOY ═══
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx7ukK_NuPGSgWjSfi0loKHhjhvmCarePXRskdVlsT_5AtUdCQHQ5S1v93rWHC_Jdvu/exec";
+
+let huCache = null;
+
+const ICON_USERS = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+const ICON_TEACHER = '<svg class="icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6"/><path d="M2 10l10-5 10 5-10 5-10-5Z"/><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5"/></svg>';
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str).replace(/[&<>"']/g, function (c) {
+    return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+  });
+}
+
+async function loadHalamanUtama() {
+  try {
+    const [resT, resN] = await Promise.all([
+      fetch(GAS_WEB_APP_URL + "?action=listTarian").then(r => r.json()),
+      fetch(GAS_WEB_APP_URL + "?action=listNyanyian").then(r => r.json())
+    ]);
+    const tarian = (resT.success ? resT.data : []) || [];
+    const nyanyian = (resN.success ? resN.data : []) || [];
+    huCache = {
+      tarian: tarian,
+      nyanyianBM: nyanyian.filter(d => d.kategoriBahasa === "Bahasa Melayu"),
+      nyanyianBI: nyanyian.filter(d => d.kategoriBahasa === "Bahasa Inggeris")
+    };
+    renderHalamanUtama();
+  } catch (err) {
+    console.error("Gagal muat data pertandingan:", err);
+    ["gridTarian", "gridNyanyianBM", "gridNyanyianBI"].forEach(id => {
+      document.getElementById(id).innerHTML = '<div class="hu-empty">Gagal memuatkan data. Sila semak GAS_WEB_APP_URL / sambungan internet.</div>';
+    });
+    document.getElementById("huCountBadge").textContent = "Ralat memuat data";
+  }
+}
+
+function renderHalamanUtama() {
+  if (!huCache) return;
+  const q = (document.getElementById("huSearchInput").value || "").toLowerCase().trim();
+  const filt = list => q ? list.filter(d => (d.sekolah || "").toLowerCase().includes(q)) : list;
+
+  const t = filt(huCache.tarian);
+  const bm = filt(huCache.nyanyianBM);
+  const bi = filt(huCache.nyanyianBI);
+
+  renderGridTarian("gridTarian", t);
+  renderGridNyanyian("gridNyanyianBM", bm);
+  renderGridNyanyian("gridNyanyianBI", bi);
+
+  document.getElementById("huCountBadge").textContent = (t.length + bm.length + bi.length) + " penyertaan";
+}
+
+function renderGridTarian(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!items.length) { el.innerHTML = '<div class="hu-empty">Tiada penyertaan tarian.</div>'; return; }
+  el.innerHTML = items.map(item => `
+    <div class="hu-card">
+      <div class="hu-school">${escapeHtml(item.sekolah)}</div>
+      ${item.tarian ? `<div class="hu-tarian-name">${escapeHtml(item.tarian)}</div>` : ""}
+      <div class="hu-listlabel">${ICON_USERS} Senarai Peserta</div>
+      <div class="hu-namelist">${(item.peserta || []).map(p => escapeHtml(p.nama)).join(", ") || "—"}</div>
+      <div class="hu-listlabel">${ICON_TEACHER} Guru Pengiring</div>
+      <div class="hu-namelist">${escapeHtml(item.guru) || "—"}</div>
+    </div>`).join("");
+}
+
+function renderGridNyanyian(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!items.length) { el.innerHTML = '<div class="hu-empty">Tiada penyertaan.</div>'; return; }
+  el.innerHTML = items.map(item => {
+    const penyanyi = (item.peserta || []).map(p => p.nama).join(" & ");
+    return `
+    <div class="hu-card">
+      <div class="hu-school">${escapeHtml(item.sekolah)}</div>
+      <div class="hu-lagu">${escapeHtml(item.tajukLagu)} — ${escapeHtml(penyanyi)}</div>
+      <div class="hu-listlabel">${ICON_USERS} Senarai Peserta</div>
+      <div class="hu-namelist">${(item.peserta || []).map(p => escapeHtml(p.nama)).join(", ") || "—"}</div>
+      <div class="hu-listlabel">${ICON_TEACHER} Guru Pengiring</div>
+      <div class="hu-namelist">${escapeHtml(item.guru) || "—"}</div>
+    </div>`;
+  }).join("");
+}
+
+document.getElementById("huSearchInput").addEventListener("input", renderHalamanUtama);
+loadHalamanUtama();
+</script>
+</body>
+</html>
