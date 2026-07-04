@@ -121,7 +121,7 @@ a{text-decoration:none;}
 .hu-loading{display:flex;align-items:center;gap:8px;color:var(--slate-500);font-size:13px;padding:16px 0;grid-column:1/-1;}
 .spinner{width:14px;height:14px;border:2px solid var(--slate-300);border-top-color:var(--blue-600);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-/* ─────────────────── BANNER (sepadan tepat dengan Pautan.html) ─────────────────── */
+/* ─────────────────── BANNER (sepadan tepat dengan pautan.html) ─────────────────── */
 .content-banner {
   width: 100%;
   margin-bottom: 18px;
@@ -168,15 +168,15 @@ a{text-decoration:none;}
 
     <nav class="sb-nav">
       <div class="sb-section-label">Menu</div>
-      <a class="nav-item active" href="https://skadinsarikei.github.io/pengelola/Index.html" target="_top">
+      <a class="nav-item active" href="https://skadinsarikei.github.io/pengelola/index.html" target="_top">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1v-9"/></svg>
         <span class="nav-item-label">Halaman Utama</span>
       </a>
-      <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/BorangTarian.html" target="_top">
+      <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/borangtarian.html" target="_top">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="1.6"/><path d="M12 6.5v5.5"/><path d="M12 12 7 9"/><path d="M12 12l6-2"/><path d="M12 12l-4 8"/><path d="M12 12l5 7"/></svg>
         <span class="nav-item-label">Borang Tarian</span>
       </a>
-      <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/BorangNyanyian.html" target="_top">
+      <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/borangnyanyian.html" target="_top">
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v4"/><path d="M9 22h6"/></svg>
         <span class="nav-item-label">Borang Nyanyian</span>
       </a>
@@ -337,7 +337,7 @@ function renderGridNyanyian(containerId, items) {
 document.getElementById("huSearchInput").addEventListener("input", renderHalamanUtama);
 loadHalamanUtama();
 
-// ═══ Bantuan Overlay Pemuatan (sepadan Pautan.html) ═══
+// ═══ Bantuan Overlay Pemuatan (sepadan pautan.html) ═══
 function showElement(id) { const el = document.getElementById(id); if (el) el.classList.remove("hidden"); }
 function hideElement(id) { const el = document.getElementById(id); if (el) el.classList.add("hidden"); }
 function showLoading(message) {
@@ -359,7 +359,7 @@ async function loadBannerDanKategori() {
     hideLoading();
     if (!result.success) return;
 
-    // Banner - guna kaedah sama seperti Pautan.html: cipta <img> secara
+    // Banner - guna kaedah sama seperti pautan.html: cipta <img> secara
     // dinamik + onerror fallback, supaya lancar & tiada ikon "gambar pecah".
     const profile = result.data.profile;
     const banner = document.getElementById("huBanner");
@@ -383,7 +383,7 @@ async function loadBannerDanKategori() {
     const nav = document.getElementById("kategoriNav");
     if (categories.length) {
       nav.innerHTML = categories.map(cat => `
-        <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/Pautan.html?cat=${encodeURIComponent(cat.id)}" target="_top">
+        <a class="nav-item" href="https://skadinsarikei.github.io/pengelola/pautan.html?cat=${encodeURIComponent(cat.id)}" target="_top">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v4H4z"/><path d="M4 12h16v8H4z"/></svg>
           <span class="nav-item-label">${escapeHtml(cat.name)}</span>
         </a>`).join("");
